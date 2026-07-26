@@ -1,0 +1,36 @@
+{
+    "assistant": {
+        "name": "SCOOBA",
+        "version": "0.6.0",
+        "developer": "Sachin"
+    },
+
+    "voice": {
+        "enabled": true,
+        "wake_word": "",
+        "language": "en",
+        "speaker_verification": false
+    },
+
+    "memory": {
+        "remember_only_on_command": true
+    },
+
+    "startup": {
+        "background_mode": true,
+        "run_on_windows_start": false
+    },
+
+    "logging": {
+        "level": "INFO"
+    },
+
+    "services": {
+        "logger": true,
+        "voice": false,
+        "memory": false,
+        "vision": false,
+        "automation": false,
+        "ai": false
+    }
+}
