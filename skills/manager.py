@@ -38,8 +38,18 @@ class SkillManager:
         )
 
         print(
+            f"Action      : "
+            f"{decision.action}"
+        )
+
+        print(
             f"Query       : "
             f"{decision.query}"
+        )
+
+        print(
+            f"Target      : "
+            f"{decision.target}"
         )
 
         print(
@@ -56,6 +66,73 @@ class SkillManager:
             return False
 
         # --------------------------------------------------
+        # SEARCH
+        # --------------------------------------------------
+
+        if decision.intent == "SEARCH":
+
+            query = decision.query
+
+            if not query:
+
+                print(
+                    "⚠ No search query detected."
+                )
+
+                return False
+
+            target = (
+                decision.target
+                or decision.entity
+                or "google"
+            )
+
+            target = target.lower().strip()
+
+            # ---------------------------------------------
+            # YouTube Search
+            # ---------------------------------------------
+
+            if target == "youtube":
+
+                print(
+                    f"🔎 YouTube Search: "
+                    f"{query}"
+                )
+
+                return self.browser.youtube_search(
+                    query
+                )
+
+            # ---------------------------------------------
+            # Google Search
+            # ---------------------------------------------
+
+            elif target == "google":
+
+                print(
+                    f"🔎 Google Search: "
+                    f"{query}"
+                )
+
+                return self.browser.google_search(
+                    query
+                )
+
+            # ---------------------------------------------
+            # Default Search
+            # ---------------------------------------------
+
+            print(
+                f"🔎 Google Search: "
+                f"{query}"
+            )
+
+            return self.browser.google_search(
+                query
+            )
+
+        # --------------------------------------------------
         # OPEN APP
         # --------------------------------------------------
 
@@ -69,24 +146,17 @@ class SkillManager:
 
                 return False
 
-            entity = decision.entity.lower().strip()
+            entity = (
+                decision.entity
+                .lower()
+                .strip()
+            )
 
             # ---------------------------------------------
             # YouTube
             # ---------------------------------------------
 
             if entity == "youtube":
-
-                if decision.query:
-
-                    print(
-                        f"🔎 YouTube Search: "
-                        f"{decision.query}"
-                    )
-
-                    return self.browser.youtube_search(
-                        decision.query
-                    )
 
                 print(
                     "▶ Opening YouTube..."
@@ -100,16 +170,9 @@ class SkillManager:
 
             elif entity == "google":
 
-                if decision.query:
-
-                    print(
-                        f"🔎 Google Search: "
-                        f"{decision.query}"
-                    )
-
-                    return self.browser.google_search(
-                        decision.query
-                    )
+                print(
+                    "🌐 Opening Google..."
+                )
 
                 return self.browser.open_url(
                     "https://www.google.com"
@@ -121,6 +184,10 @@ class SkillManager:
 
             elif entity == "github":
 
+                print(
+                    "🐙 Opening GitHub..."
+                )
+
                 return self.browser.github()
 
             # ---------------------------------------------
@@ -128,6 +195,10 @@ class SkillManager:
             # ---------------------------------------------
 
             elif entity == "gmail":
+
+                print(
+                    "📧 Opening Gmail..."
+                )
 
                 return self.browser.gmail()
 
@@ -137,11 +208,20 @@ class SkillManager:
 
             elif entity == "chatgpt":
 
+                print(
+                    "🤖 Opening ChatGPT..."
+                )
+
                 return self.browser.chatgpt()
 
             # ---------------------------------------------
             # Desktop Application
             # ---------------------------------------------
+
+            print(
+                f"🖥 Opening application: "
+                f"{entity}"
+            )
 
             return self.desktop.open(
                 entity
@@ -241,6 +321,14 @@ class SkillManager:
                 decision.target
                 or decision.entity
             )
+
+            if not project_name:
+
+                print(
+                    "⚠ No project name detected."
+                )
+
+                return False
 
             print(
                 f"🐍 Creating Python project: "

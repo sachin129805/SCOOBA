@@ -66,6 +66,159 @@ class AIEngine:
             )
 
         # ---------------------------------
+        # Detect Browser Search Command
+        # ---------------------------------
+        #
+        # Examples:
+        #
+        # "open youtube and search good day"
+        # "open youtube and search for good day"
+        # "youtube search python tutorial"
+        #
+        # These should become:
+        #
+        # intent = SEARCH
+        # entity = youtube
+        # action = search
+        # query = good day
+        # target = youtube
+        #
+
+        search_markers = [
+            " and search for ",
+            " and search ",
+            " search for ",
+            " search ",
+            " and find ",
+            " and look for "
+        ]
+
+        search_marker = None
+
+        for marker in search_markers:
+
+            if marker in text:
+
+                search_marker = marker
+
+                break
+
+        # ---------------------------------
+        # Handle SEARCH
+        # ---------------------------------
+
+        if search_marker:
+
+            parts = text.split(
+                search_marker,
+                1
+            )
+
+            app_part = parts[0].strip()
+            query_part = parts[1].strip()
+
+            # Remove opening words
+            for word in [
+                "open ",
+                "launch ",
+                "start ",
+                "run "
+            ]:
+
+                if app_part.startswith(word):
+
+                    app_part = (
+                        app_part[len(word):]
+                        .strip()
+                    )
+
+                    break
+
+            # ---------------------------------
+            # Resolve Application
+            # ---------------------------------
+
+            app = self.app_resolver.resolve(
+                app_part
+            )
+
+            # If the complete phrase doesn't
+            # resolve, check individual words.
+            if not app:
+
+                for token in app_part.split():
+
+                    app = self.app_resolver.resolve(
+                        token
+                    )
+
+                    if app:
+
+                        app_part = token.lower()
+
+                        break
+
+            decision = Decision()
+
+            decision.intent = "SEARCH"
+
+            decision.entity = app_part
+
+            decision.action = "search"
+
+            decision.query = query_part
+
+            decision.target = app_part
+
+            decision.confidence = (
+                1.0
+                if app
+                else 0.5
+            )
+
+            # ---------------------------------
+            # Debug
+            # ---------------------------------
+
+            print("\n========== AI DECISION ==========")
+
+            print(
+                f"Intent      : "
+                f"{decision.intent}"
+            )
+
+            print(
+                f"Entity      : "
+                f"{decision.entity}"
+            )
+
+            print(
+                f"Action      : "
+                f"{decision.action}"
+            )
+
+            print(
+                f"Query       : "
+                f"{decision.query}"
+            )
+
+            print(
+                f"Target      : "
+                f"{decision.target}"
+            )
+
+            print(
+                f"Confidence  : "
+                f"{decision.confidence}"
+            )
+
+            print(
+                "=================================\n"
+            )
+
+            return decision
+
+        # ---------------------------------
         # NLP
         # ---------------------------------
 
@@ -87,6 +240,14 @@ class AIEngine:
             "target"
         )
 
+        decision.action = result.get(
+            "action"
+        )
+
+        decision.location = result.get(
+            "location"
+        )
+
         # ---------------------------------
         # Resolve Application
         # ---------------------------------
@@ -97,18 +258,6 @@ class AIEngine:
             #
             # If NLP already detected an
             # application, preserve it.
-            #
-            # Example:
-            #
-            # "youtube and search for good day"
-            #
-            # NLP gives:
-            #
-            # entity = youtube
-            # query  = good day
-            #
-            # We must NOT overwrite entity
-            # with the entire sentence.
 
             if not decision.entity:
 
@@ -124,15 +273,6 @@ class AIEngine:
                 # ---------------------------------
                 # Remove Search Portion
                 # ---------------------------------
-
-                search_markers = [
-                    " and search for ",
-                    " and search ",
-                    " search for ",
-                    " search ",
-                    " and find ",
-                    " and look for "
-                ]
 
                 for marker in search_markers:
 
@@ -178,6 +318,24 @@ class AIEngine:
                             break
 
         # ---------------------------------
+        # Default Action
+        # ---------------------------------
+
+        if not decision.action:
+
+            if decision.intent == "OPEN_APP":
+
+                decision.action = "open"
+
+            elif decision.intent == "CREATE_FILE":
+
+                decision.action = "create"
+
+            elif decision.intent == "CREATE_FOLDER":
+
+                decision.action = "create"
+
+        # ---------------------------------
         # Confidence
         # ---------------------------------
 
@@ -204,6 +362,11 @@ class AIEngine:
         )
 
         print(
+            f"Action      : "
+            f"{decision.action}"
+        )
+
+        print(
             f"Query       : "
             f"{decision.query}"
         )
@@ -211,6 +374,11 @@ class AIEngine:
         print(
             f"Target      : "
             f"{decision.target}"
+        )
+
+        print(
+            f"Location    : "
+            f"{decision.location}"
         )
 
         print(
