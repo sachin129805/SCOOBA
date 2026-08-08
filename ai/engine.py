@@ -68,21 +68,6 @@ class AIEngine:
         # ---------------------------------
         # Detect Browser Search Command
         # ---------------------------------
-        #
-        # Examples:
-        #
-        # "open youtube and search good day"
-        # "open youtube and search for good day"
-        # "youtube search python tutorial"
-        #
-        # These should become:
-        #
-        # intent = SEARCH
-        # entity = youtube
-        # action = search
-        # query = good day
-        # target = youtube
-        #
 
         search_markers = [
             " and search for ",
@@ -142,8 +127,8 @@ class AIEngine:
                 app_part
             )
 
-            # If the complete phrase doesn't
-            # resolve, check individual words.
+            # If complete phrase doesn't resolve,
+            # check individual words.
             if not app:
 
                 for token in app_part.split():
@@ -170,6 +155,11 @@ class AIEngine:
 
             decision.target = app_part
 
+            # IMPORTANT:
+            # Preserve the original command.
+
+            decision.command = text
+
             decision.confidence = (
                 1.0
                 if app
@@ -180,7 +170,9 @@ class AIEngine:
             # Debug
             # ---------------------------------
 
-            print("\n========== AI DECISION ==========")
+            print(
+                "\n========== AI DECISION =========="
+            )
 
             print(
                 f"Intent      : "
@@ -205,6 +197,11 @@ class AIEngine:
             print(
                 f"Target      : "
                 f"{decision.target}"
+            )
+
+            print(
+                f"Command     : "
+                f"{decision.command}"
             )
 
             print(
@@ -248,16 +245,16 @@ class AIEngine:
             "location"
         )
 
+        # IMPORTANT:
+        # Preserve original normalized command.
+
+        decision.command = text
+
         # ---------------------------------
         # Resolve Application
         # ---------------------------------
 
         if decision.intent == "OPEN_APP":
-
-            # IMPORTANT:
-            #
-            # If NLP already detected an
-            # application, preserve it.
 
             if not decision.entity:
 
@@ -335,6 +332,10 @@ class AIEngine:
 
                 decision.action = "create"
 
+            elif decision.intent == "CLOSE_APP":
+
+                decision.action = "close"
+
         # ---------------------------------
         # Confidence
         # ---------------------------------
@@ -349,7 +350,9 @@ class AIEngine:
         # Debug
         # ---------------------------------
 
-        print("\n========== AI DECISION ==========")
+        print(
+            "\n========== AI DECISION =========="
+        )
 
         print(
             f"Intent      : "
@@ -379,6 +382,11 @@ class AIEngine:
         print(
             f"Location    : "
             f"{decision.location}"
+        )
+
+        print(
+            f"Command     : "
+            f"{decision.command}"
         )
 
         print(

@@ -17,11 +17,94 @@ class Planner:
 
         tasks = []
 
+        command = (
+            decision.command
+            or ""
+        ).lower().strip()
+
         # ---------------------------------
-        # SEARCH
+        # MULTI-STEP BROWSER SEARCH
+        # ---------------------------------
+        #
+        # Example:
+        #
+        # "open youtube and search avicii"
+        #
+        # Becomes:
+        #
+        # Task 1 -> open youtube
+        # Task 2 -> search youtube for avicii
+        #
+
+        compound_markers = [
+            " and search for ",
+            " and search ",
+            " and find ",
+            " and look for "
+        ]
+
+        compound_marker = None
+
+        for marker in compound_markers:
+
+            if marker in command:
+
+                compound_marker = marker
+
+                break
+
+        if (
+            decision.intent == "SEARCH"
+            and compound_marker
+            and decision.entity
+            and decision.query
+        ):
+
+            # ---------------------------------
+            # OPEN TASK
+            # ---------------------------------
+
+            opening_part = command.split(
+                compound_marker,
+                1
+            )[0].strip()
+
+            opening_part = (
+                opening_part
+                .replace("open ", "", 1)
+                .replace("launch ", "", 1)
+                .replace("start ", "", 1)
+                .replace("run ", "", 1)
+                .strip()
+            )
+
+            tasks.append(
+                Task(
+                    skill="browser",
+                    action="open",
+                    entity=opening_part
+                )
+            )
+
+            # ---------------------------------
+            # SEARCH TASK
+            # ---------------------------------
+
+            tasks.append(
+                Task(
+                    skill="browser",
+                    action="search",
+                    entity=decision.target
+                    or decision.entity,
+                    query=decision.query
+                )
+            )
+
+        # ---------------------------------
+        # NORMAL SEARCH
         # ---------------------------------
 
-        if decision.intent == "SEARCH":
+        elif decision.intent == "SEARCH":
 
             target = (
                 decision.target
@@ -46,7 +129,7 @@ class Planner:
 
             tasks.append(
                 Task(
-                    skill="desktop",
+                    skill="browser",
                     action="open",
                     entity=decision.entity
                 )
@@ -117,11 +200,15 @@ class Planner:
         # DEBUG PLAN
         # ---------------------------------
 
-        print("\n========== PLAN ==========")
+        print(
+            "\n========== PLAN =========="
+        )
 
         if not tasks:
 
-            print("No tasks generated.")
+            print(
+                "No tasks generated."
+            )
 
         else:
 
@@ -144,6 +231,8 @@ class Planner:
                         f"{task.query}"
                     )
 
-        print("==========================\n")
+        print(
+            "==========================\n"
+        )
 
         return tasks

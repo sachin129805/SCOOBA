@@ -44,6 +44,14 @@ class Decision:
     # Optional location/path
     location: Optional[str] = None
 
+    # Original user command
+    #
+    # This is important for multi-step commands.
+    #
+    # Example:
+    # "open youtube and search avicii"
+    command: Optional[str] = None
+
     # AI confidence
     confidence: float = 0.0
 

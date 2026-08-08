@@ -36,9 +36,9 @@ class SkillManager:
             f"({task.entity})"
         )
 
-        # ---------------------------------------------
+        # ==================================================
         # BROWSER
-        # ---------------------------------------------
+        # ==================================================
 
         if task.skill == "browser":
 
@@ -47,17 +47,25 @@ class SkillManager:
                 or "google"
             ).lower().strip()
 
-            # -----------------------------------------
-            # Open
-            # -----------------------------------------
+            # ---------------------------------------------
+            # OPEN
+            # ---------------------------------------------
 
             if task.action == "open":
 
                 if target == "youtube":
 
+                    print(
+                        "▶ Opening YouTube..."
+                    )
+
                     return self.browser.youtube()
 
                 elif target == "google":
+
+                    print(
+                        "🌐 Opening Google..."
+                    )
 
                     return self.browser.open_url(
                         "https://www.google.com"
@@ -65,23 +73,42 @@ class SkillManager:
 
                 elif target == "github":
 
+                    print(
+                        "🐙 Opening GitHub..."
+                    )
+
                     return self.browser.github()
 
                 elif target == "gmail":
+
+                    print(
+                        "📧 Opening Gmail..."
+                    )
 
                     return self.browser.gmail()
 
                 elif target == "chatgpt":
 
+                    print(
+                        "🤖 Opening ChatGPT..."
+                    )
+
                     return self.browser.chatgpt()
+
+                # Desktop application fallback
+
+                print(
+                    f"🖥 Opening application: "
+                    f"{target}"
+                )
 
                 return self.desktop.open(
                     target
                 )
 
-            # -----------------------------------------
-            # Search
-            # -----------------------------------------
+            # ---------------------------------------------
+            # SEARCH
+            # ---------------------------------------------
 
             elif task.action == "search":
 
@@ -116,6 +143,8 @@ class SkillManager:
                         task.query
                     )
 
+                # Default to Google
+
                 print(
                     f"🔎 Google Search: "
                     f"{task.query}"
@@ -125,6 +154,10 @@ class SkillManager:
                     task.query
                 )
 
+            # ---------------------------------------------
+            # UNKNOWN BROWSER ACTION
+            # ---------------------------------------------
+
             print(
                 f"⚠ Unknown browser action: "
                 f"{task.action}"
@@ -132,15 +165,23 @@ class SkillManager:
 
             return False
 
-        # ---------------------------------------------
+        # ==================================================
         # FILESYSTEM
-        # ---------------------------------------------
+        # ==================================================
 
         if task.skill == "filesystem":
+
+            # ---------------------------------------------
+            # CREATE FOLDER
+            # ---------------------------------------------
 
             if task.action == "create_folder":
 
                 if not task.entity:
+
+                    print(
+                        "⚠ Folder name missing."
+                    )
 
                     return False
 
@@ -148,9 +189,17 @@ class SkillManager:
                     task.entity
                 )
 
+            # ---------------------------------------------
+            # CREATE FILE
+            # ---------------------------------------------
+
             elif task.action == "create_file":
 
                 if not task.entity:
+
+                    print(
+                        "⚠ File name missing."
+                    )
 
                     return False
 
@@ -165,9 +214,9 @@ class SkillManager:
 
             return False
 
-        # ---------------------------------------------
+        # ==================================================
         # DEVELOPER
-        # ---------------------------------------------
+        # ==================================================
 
         if task.skill == "developer":
 
@@ -178,9 +227,9 @@ class SkillManager:
 
             return False
 
-        # ---------------------------------------------
+        # ==================================================
         # UNKNOWN SKILL
-        # ---------------------------------------------
+        # ==================================================
 
         print(
             f"⚠ Unknown skill: "
@@ -192,11 +241,27 @@ class SkillManager:
     # ==================================================
     # LEGACY DECISION EXECUTION
     # ==================================================
+    #
+    # Kept temporarily for compatibility.
+    #
+    # The new SCOOBA runtime should use:
+    #
+    # Decision
+    #     ↓
+    # Planner
+    #     ↓
+    # Task[]
+    #     ↓
+    # Executor
+    #     ↓
+    # execute_task()
+    #
+    # ==================================================
 
     def execute(self, decision):
 
         print(
-            "\n========== DECISION =========="
+            "\n========== LEGACY DECISION =========="
         )
 
         print(
@@ -230,16 +295,16 @@ class SkillManager:
         )
 
         print(
-            "==============================\n"
+            "=====================================\n"
         )
 
         if decision.intent is None:
 
             return False
 
-        # --------------------------------------------------
+        # ---------------------------------------------
         # SEARCH
-        # --------------------------------------------------
+        # ---------------------------------------------
 
         if decision.intent == "SEARCH":
 
@@ -287,9 +352,9 @@ class SkillManager:
                 query
             )
 
-        # --------------------------------------------------
+        # ---------------------------------------------
         # OPEN APP
-        # --------------------------------------------------
+        # ---------------------------------------------
 
         if decision.intent == "OPEN_APP":
 
@@ -333,9 +398,9 @@ class SkillManager:
                 entity
             )
 
-        # --------------------------------------------------
+        # ---------------------------------------------
         # CREATE FOLDER
-        # --------------------------------------------------
+        # ---------------------------------------------
 
         elif decision.intent == "CREATE_FOLDER":
 
@@ -352,9 +417,9 @@ class SkillManager:
                 folder_name
             )
 
-        # --------------------------------------------------
+        # ---------------------------------------------
         # CREATE FILE
-        # --------------------------------------------------
+        # ---------------------------------------------
 
         elif decision.intent == "CREATE_FILE":
 
@@ -371,9 +436,9 @@ class SkillManager:
                 file_name
             )
 
-        # --------------------------------------------------
+        # ---------------------------------------------
         # CREATE PYTHON PROJECT
-        # --------------------------------------------------
+        # ---------------------------------------------
 
         elif decision.intent == (
             "CREATE_PYTHON_PROJECT"
@@ -395,9 +460,9 @@ class SkillManager:
 
             return True
 
-        # --------------------------------------------------
+        # ---------------------------------------------
         # CLOSE APP
-        # --------------------------------------------------
+        # ---------------------------------------------
 
         elif decision.intent == "CLOSE_APP":
 

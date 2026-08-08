@@ -4,10 +4,6 @@ from planner.executor import Executor
 from skills.manager import SkillManager
 
 
-# ---------------------------------
-# Initialize
-# ---------------------------------
-
 ai = AIEngine()
 
 planner = Planner()
@@ -19,20 +15,17 @@ executor = Executor(
 )
 
 
-# ---------------------------------
-# Command
-# ---------------------------------
+command = "open youtube and search avicii"
 
-command = "search youtube for Avicii"
+
+print("\n" + "=" * 60)
+print("COMMAND:", command)
+print("=" * 60)
 
 
 # ---------------------------------
 # AI
 # ---------------------------------
-
-print("\n========== COMMAND ==========")
-print(command)
-print("=============================\n")
 
 decision = ai.think(
     command
@@ -40,7 +33,7 @@ decision = ai.think(
 
 
 # ---------------------------------
-# Planning
+# PLAN
 # ---------------------------------
 
 tasks = planner.create_plan(
@@ -49,7 +42,7 @@ tasks = planner.create_plan(
 
 
 # ---------------------------------
-# Execution
+# EXECUTE
 # ---------------------------------
 
 success = executor.execute(
@@ -57,7 +50,14 @@ success = executor.execute(
 )
 
 
+# ---------------------------------
+# RESULT
+# ---------------------------------
+
 print(
-    f"\nFinal Result: "
-    f"{'SUCCESS' if success else 'FAILED'}"
+    "\nFinal Result:",
+    "SUCCESS"
+    if success
+    else
+    "FAILED"
 )

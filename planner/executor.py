@@ -23,12 +23,17 @@ class Executor:
 
     def execute(self, tasks):
 
-        print("\n========== PLAN ==========")
+        print("\n========== EXECUTION ==========")
 
         if not tasks:
 
-            print("No tasks to execute.")
-            print("==========================\n")
+            print(
+                "No tasks to execute."
+            )
+
+            print(
+                "================================\n"
+            )
 
             return False
 
@@ -40,46 +45,62 @@ class Executor:
         ):
 
             print(
-                f"{i}. "
-                f"{task.skill} -> "
-                f"{task.action} "
-                f"({task.entity})"
+                f"\n▶ Task {i}"
+            )
+
+            print(
+                f"  Skill    : {task.skill}"
+            )
+
+            print(
+                f"  Action   : {task.action}"
+            )
+
+            print(
+                f"  Entity   : {task.entity}"
             )
 
             if task.query:
 
                 print(
-                    f"   Query: "
-                    f"{task.query}"
+                    f"  Query    : {task.query}"
                 )
 
             # ---------------------------------
             # Execute Task
             # ---------------------------------
 
-            success = self.skills.execute_task(
-                task
+            success = (
+                self.skills.execute_task(
+                    task
+                )
             )
 
             if success:
 
                 print(
-                    f"   ✅ Task {i} completed."
+                    f"  ✅ Task {i} completed."
                 )
 
             else:
 
                 print(
-                    f"   ❌ Task {i} failed."
+                    f"  ❌ Task {i} failed."
                 )
 
                 overall_success = False
 
-                # Stop plan execution if a
+                # Stop execution when a
                 # previous task fails.
+
+                print(
+                    "\n⚠ Plan execution stopped."
+                )
 
                 break
 
-        print("==========================\n")
+        print(
+            "\n================================\n"
+        )
 
         return overall_success
