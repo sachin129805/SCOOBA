@@ -1,11 +1,3 @@
 """
-==================================================
-SCOOBA
-
-Skills Package
-
-Author: Sachin
-==================================================
+SCOOBA Skills Package
 """
-
-from .manager import SkillManager
