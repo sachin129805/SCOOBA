@@ -1,16 +1,23 @@
 from ai.engine import AIEngine
 
-engine = AIEngine()
 
-while True:
+ai = AIEngine()
 
-    text = input("\nYou : ")
+commands = [
+    "open youtube",
+    "search youtube for good day",
+    "find cats on youtube",
+    "open google and search python tutorials",
+    "create a folder called projects",
+    "create a python project called scooba"
+]
 
-    if text.lower() == "exit":
-        break
+for command in commands:
 
-    decision = engine.think(text)
+    print("\n" + "=" * 60)
+    print("COMMAND:", command)
+    print("=" * 60)
 
-    print("\nDecision")
+    decision = ai.think(command)
 
     print(decision)

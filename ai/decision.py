@@ -29,7 +29,7 @@ class Decision:
     action: Optional[str] = None
 
     # Search query
-    # Example:
+    # Examples:
     # good day
     # python tutorial
     query: Optional[str] = None
