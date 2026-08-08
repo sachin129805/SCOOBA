@@ -1,0 +1,470 @@
+{
+    "about java": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Java\\About Java.lnk",
+        "source": "startmenu"
+    },
+    "administrative tools": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools.lnk",
+        "source": "startmenu"
+    },
+    "adobe offers": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Adobe offers.lnk",
+        "source": "startmenu"
+    },
+    "agoda": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Agoda.lnk",
+        "source": "startmenu"
+    },
+    "amazon.com": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Amazon.com.lnk",
+        "source": "startmenu"
+    },
+    "anaconda powershell prompt": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Anaconda (conda)\\Anaconda PowerShell Prompt.lnk",
+        "source": "startmenu"
+    },
+    "anaconda prompt": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Anaconda (conda)\\Anaconda Prompt.lnk",
+        "source": "startmenu"
+    },
+    "antigravity ide": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Antigravity IDE\\Antigravity IDE.lnk",
+        "source": "startmenu"
+    },
+    "antigravity ide (user)": {
+        "path": "C:\\Users\\sachi\\AppData\\Local\\Programs\\Antigravity IDE\\Antigravity IDE.exe",
+        "source": "registry"
+    },
+    "brave": {
+        "path": "C:\\Users\\sachi\\AppData\\Local\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+        "source": "registry"
+    },
+    "canva": {
+        "path": "C:\\Users\\sachi\\AppData\\Local\\Programs\\Canva\\Canva.exe",
+        "source": "registry"
+    },
+    "character map": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\System Tools\\Character Map.lnk",
+        "source": "startmenu"
+    },
+    "check for updates": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Java\\Check For Updates.lnk",
+        "source": "startmenu"
+    },
+    "command prompt": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\Command Prompt.lnk",
+        "source": "startmenu"
+    },
+    "component services": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\Component Services.lnk",
+        "source": "startmenu"
+    },
+    "computer management": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\Computer Management.lnk",
+        "source": "startmenu"
+    },
+    "configure java": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Java\\Configure Java.lnk",
+        "source": "startmenu"
+    },
+    "control panel": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\Control Panel.lnk",
+        "source": "startmenu"
+    },
+    "copilot": {
+        "path": "C:\\Program Files (x86)\\Microsoft\\Copilot\\Application\\150.0.4078.65\\mscopilot.exe",
+        "source": "registry"
+    },
+    "cpan client": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Strawberry Perl (64-bit)\\Tools\\CPAN Client.lnk",
+        "source": "startmenu"
+    },
+    "cpan module search": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Strawberry Perl (64-bit)\\Related Websites\\CPAN Module Search.lnk",
+        "source": "startmenu"
+    },
+    "create local library areas": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Strawberry Perl (64-bit)\\Tools\\Create local library areas.lnk",
+        "source": "startmenu"
+    },
+    "cursor": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Cursor.lnk",
+        "source": "startmenu"
+    },
+    "cursor (user)": {
+        "path": "C:\\Users\\sachi\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+        "source": "registry"
+    },
+    "dfrgui": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\dfrgui.lnk",
+        "source": "startmenu"
+    },
+    "disk cleanup": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\Disk Cleanup.lnk",
+        "source": "startmenu"
+    },
+    "droidcam client": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\DroidCam Client\\DroidCam Client.lnk",
+        "source": "startmenu"
+    },
+    "event viewer": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\Event Viewer.lnk",
+        "source": "startmenu"
+    },
+    "excel": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Excel.lnk",
+        "source": "startmenu"
+    },
+    "file explorer": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\File Explorer.lnk",
+        "source": "startmenu"
+    },
+    "free fire max lost treasure": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Google Play Games\\Free Fire MAX Lost Treasure.lnk",
+        "source": "startmenu"
+    },
+    "git bash": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Git\\Git Bash.lnk",
+        "source": "startmenu"
+    },
+    "git cmd": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Git\\Git CMD.lnk",
+        "source": "startmenu"
+    },
+    "git for windows": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Git for Windows.lnk",
+        "source": "startmenu"
+    },
+    "git gui": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Git\\Git GUI.lnk",
+        "source": "startmenu"
+    },
+    "github desktop": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\GitHub, Inc\\GitHub Desktop.lnk",
+        "source": "startmenu"
+    },
+    "google chrome": {
+        "path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        "source": "registry"
+    },
+    "google gemini": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Chrome Apps\\Google Gemini.lnk",
+        "source": "startmenu"
+    },
+    "google keep": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Brave Apps\\Google Keep.lnk",
+        "source": "startmenu"
+    },
+    "google play games": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Google Play Games\\Google Play Games.lnk",
+        "source": "startmenu"
+    },
+    "hp connection optimizer": {
+        "path": "C:\\Program Files\\HPCommRecovery\\HPCommRecovery.exe",
+        "source": "registry"
+    },
+    "idle (python 3.14)": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Python\\Python 3.14\\IDLE (Python 3.14).lnk",
+        "source": "startmenu"
+    },
+    "install additional tools for node.js": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Node.js\\Install Additional Tools for Node.js.lnk",
+        "source": "startmenu"
+    },
+    "iscsi initiator": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\iSCSI Initiator.lnk",
+        "source": "startmenu"
+    },
+    "krita (x64)": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Krita\\Krita (x64).lnk",
+        "source": "startmenu"
+    },
+    "live support (chat)": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Strawberry Perl (64-bit)\\Related Websites\\Live Support (chat).lnk",
+        "source": "startmenu"
+    },
+    "livecaptions": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Accessibility\\LiveCaptions.lnk",
+        "source": "startmenu"
+    },
+    "magnify": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Accessibility\\Magnify.lnk",
+        "source": "startmenu"
+    },
+    "memory diagnostics tool": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\Memory Diagnostics Tool.lnk",
+        "source": "startmenu"
+    },
+    "metacpan search engine": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Strawberry Perl (64-bit)\\Related Websites\\MetaCPAN Search Engine.lnk",
+        "source": "startmenu"
+    },
+    "microsoft edge": {
+        "path": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\150.0.4078.99\\msedge.exe",
+        "source": "registry"
+    },
+    "microsoft edge webview2 runtime": {
+        "path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\150.0.4078.99\\msedgewebview2.exe",
+        "source": "registry"
+    },
+    "microsoft office home and student 2021 - en-us": {
+        "path": "C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\OfficeClickToRun.exe",
+        "source": "registry"
+    },
+    "microsoft onenote - en-us": {
+        "path": "C:\\Program Files\\Common Files\\Microsoft Shared\\ClickToRun\\OfficeClickToRun.exe",
+        "source": "registry"
+    },
+    "microsoft visual c++ 2015-2022 redistributable (x64) - 14.44.35211": {
+        "path": "C:\\ProgramData\\Package Cache\\{d8bbe9f9-7c5b-42c6-b715-9ee898a2e515}\\VC_redist.x64.exe",
+        "source": "registry"
+    },
+    "microsoft visual c++ 2015-2022 redistributable (x86) - 14.44.35211": {
+        "path": "C:\\ProgramData\\Package Cache\\{0b5169e3-39da-4313-808e-1f9c0407f3bf}\\VC_redist.x86.exe",
+        "source": "registry"
+    },
+    "microsoft visual studio code (user)": {
+        "path": "C:\\Users\\sachi\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+        "source": "registry"
+    },
+    "miktex": {
+        "path": "C:\\Users\\sachi\\AppData\\Local\\Programs\\MiKTeX\\miktex/bin/x64\\miktex-console.exe",
+        "source": "registry"
+    },
+    "miktex console": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\MiKTeX\\MiKTeX Console.lnk",
+        "source": "startmenu"
+    },
+    "mysql 8.0 command line client": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\MySQL\\MySQL Server 8.0\\MySQL 8.0 Command Line Client.lnk",
+        "source": "startmenu"
+    },
+    "mysql 8.0 command line client - unicode": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\MySQL\\MySQL Server 8.0\\MySQL 8.0 Command Line Client - Unicode.lnk",
+        "source": "startmenu"
+    },
+    "mysql 8.4 command line client": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\MySQL\\MySQL Server 8.4\\MySQL 8.4 Command Line Client.lnk",
+        "source": "startmenu"
+    },
+    "mysql 8.4 command line client - unicode": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\MySQL\\MySQL Server 8.4\\MySQL 8.4 Command Line Client - Unicode.lnk",
+        "source": "startmenu"
+    },
+    "mysql 8.4 configurator": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\MySQL\\MySQL Server 8.4\\MySQL 8.4 Configurator.lnk",
+        "source": "startmenu"
+    },
+    "mysql installer - community": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\MySQL\\MySQL Installer - Community\\MySQL Installer - Community.lnk",
+        "source": "startmenu"
+    },
+    "mysql shell": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\MySQL\\MySQL Shell.lnk",
+        "source": "startmenu"
+    },
+    "mysql workbench 8.0 ce": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\MySQL\\MySQL Workbench 8.0 CE.lnk",
+        "source": "startmenu"
+    },
+    "narrator": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Accessibility\\Narrator.lnk",
+        "source": "startmenu"
+    },
+    "node.js": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Node.js\\Node.js.lnk",
+        "source": "startmenu"
+    },
+    "node.js command prompt": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Node.js\\Node.js command prompt.lnk",
+        "source": "startmenu"
+    },
+    "odbc data sources (32-bit)": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\ODBC Data Sources (32-bit).lnk",
+        "source": "startmenu"
+    },
+    "odbc data sources (64-bit)": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\ODBC Data Sources (64-bit).lnk",
+        "source": "startmenu"
+    },
+    "office language preferences": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Office Tools\\Office Language Preferences.lnk",
+        "source": "startmenu"
+    },
+    "on-screen keyboard": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Accessibility\\On-Screen Keyboard.lnk",
+        "source": "startmenu"
+    },
+    "onedrive": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\OneDrive.lnk",
+        "source": "startmenu"
+    },
+    "onenote": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\OneNote.lnk",
+        "source": "startmenu"
+    },
+    "pdfgear": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\PDFgear\\PDFgear.lnk",
+        "source": "startmenu"
+    },
+    "pdfgear 2.1.5": {
+        "path": "C:\\Program Files\\PDFgear\\PDFLauncher.exe",
+        "source": "registry"
+    },
+    "performance monitor": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\Performance Monitor.lnk",
+        "source": "startmenu"
+    },
+    "perl (command line)": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Strawberry Perl (64-bit)\\Perl (command line).lnk",
+        "source": "startmenu"
+    },
+    "powerpoint": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\PowerPoint.lnk",
+        "source": "startmenu"
+    },
+    "pycharm 2025.2.0.1": {
+        "path": "C:\\Users\\sachi\\AppData\\Local\\Programs\\PyCharm 2025.2.0.1\\bin\\pycharm64.exe",
+        "source": "registry"
+    },
+    "pydoc (python 3.14)": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Python\\Python 3.14\\PyDoc (Python 3.14).lnk",
+        "source": "startmenu"
+    },
+    "python 3.14": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Python\\Python 3.14\\Python 3.14.lnk",
+        "source": "startmenu"
+    },
+    "python 3.14.6": {
+        "path": "C:\\Users\\sachi\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "source": "registry"
+    },
+    "recoverydrive": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\RecoveryDrive.lnk",
+        "source": "startmenu"
+    },
+    "registry editor": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\Registry Editor.lnk",
+        "source": "startmenu"
+    },
+    "remote desktop connection": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Remote Desktop Connection.lnk",
+        "source": "startmenu"
+    },
+    "resource monitor": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\Resource Monitor.lnk",
+        "source": "startmenu"
+    },
+    "run": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\Run.lnk",
+        "source": "startmenu"
+    },
+    "services": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\services.lnk",
+        "source": "startmenu"
+    },
+    "space waves": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Chrome Apps\\Space Waves.lnk",
+        "source": "startmenu"
+    },
+    "steam": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Steam\\Steam.lnk",
+        "source": "startmenu"
+    },
+    "steps recorder": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Steps Recorder.lnk",
+        "source": "startmenu"
+    },
+    "sticky notes (new)": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Sticky Notes (new).lnk",
+        "source": "startmenu"
+    },
+    "system configuration": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\System Configuration.lnk",
+        "source": "startmenu"
+    },
+    "system information": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\System Information.lnk",
+        "source": "startmenu"
+    },
+    "task manager": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\Task Manager.lnk",
+        "source": "startmenu"
+    },
+    "task scheduler": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\Task Scheduler.lnk",
+        "source": "startmenu"
+    },
+    "texworks": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\MiKTeX\\TeXworks.lnk",
+        "source": "startmenu"
+    },
+    "visual studio code": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Visual Studio Code.lnk",
+        "source": "startmenu"
+    },
+    "vlc media player": {
+        "path": "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
+        "source": "registry"
+    },
+    "vlc media player - reset preferences and cache files": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\VideoLAN\\VLC media player - reset preferences and cache files.lnk",
+        "source": "startmenu"
+    },
+    "vlc media player skinned": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\VideoLAN\\VLC media player skinned.lnk",
+        "source": "startmenu"
+    },
+    "voiceaccess": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Accessibility\\VoiceAccess.lnk",
+        "source": "startmenu"
+    },
+    "welcome to colab - colab": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Chrome Apps\\Welcome to Colab - Colab.lnk",
+        "source": "startmenu"
+    },
+    "windows defender firewall with advanced security": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Administrative Tools\\Windows Defender Firewall with Advanced Security.lnk",
+        "source": "startmenu"
+    },
+    "windows media player legacy": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Windows Media Player Legacy.lnk",
+        "source": "startmenu"
+    },
+    "windows powershell": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Windows PowerShell\\Windows PowerShell.lnk",
+        "source": "startmenu"
+    },
+    "windows powershell (x86)": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Windows PowerShell\\Windows PowerShell (x86).lnk",
+        "source": "startmenu"
+    },
+    "windows powershell ise": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Windows PowerShell\\Windows PowerShell ISE.lnk",
+        "source": "startmenu"
+    },
+    "windows powershell ise (x86)": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Windows PowerShell\\Windows PowerShell ISE (x86).lnk",
+        "source": "startmenu"
+    },
+    "wondershare filmora 15": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Wondershare\\Wondershare Filmora\\Wondershare Filmora 15.lnk",
+        "source": "startmenu"
+    },
+    "wondershare filmora 15(build 15.3.21.18723)": {
+        "path": "C:\\Users\\sachi\\AppData\\Local\\Wondershare\\Wondershare Filmora\\unins000.exe",
+        "source": "registry"
+    },
+    "word": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Word.lnk",
+        "source": "startmenu"
+    },
+    "xps viewer": {
+        "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\XPS Viewer.lnk",
+        "source": "startmenu"
+    },
+    "zoom workplace": {
+        "path": "C:\\Users\\sachi\\AppData\\Roaming\\Zoom\\bin\\Zoom.exe",
+        "source": "registry"
+    }
+}

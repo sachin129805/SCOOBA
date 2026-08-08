@@ -4,27 +4,29 @@ SCOOBA
 
 Voice Pipeline
 
-Purpose:
-Coordinates the complete voice workflow.
-
 Author: Sachin
 ==================================================
 """
 
+import os
+
 
 class VoicePipeline:
 
-    def __init__(self, stream, speech):
+    def __init__(self, recorder, transcriber):
 
-        self.stream = stream
-        self.speech = speech
+        self.recorder = recorder
+        self.transcriber = transcriber
 
     def listen(self):
 
-        self.stream.start()
+        audio = self.recorder.record(5)
 
-        text = self.speech.listen()
+        text = self.transcriber.transcribe(audio)
 
-        self.stream.stop()
+        try:
+            os.remove(audio)
+        except:
+            pass
 
         return text

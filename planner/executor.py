@@ -2,90 +2,26 @@
 ==================================================
 SCOOBA
 
-Task Executor
+Plan Executor
 
 Author: Sachin
 ==================================================
 """
 
-from launcher.resolver import ApplicationResolver
-from launcher.windows_launcher import WindowsLauncher
-from skills.filesystem import FileSystemSkill
-from skills.terminal import TerminalSkill
-
 
 class Executor:
 
-    def __init__(self):
-
-        self.resolver = ApplicationResolver()
-        self.launcher = WindowsLauncher()
-        self.filesystem = FileSystemSkill()
-        self.terminal = TerminalSkill()
-
     def execute(self, tasks):
 
-        for task in tasks:
+        print("\n========== PLAN ==========")
 
-            print(f"\nExecuting : {task}")
+        for i, task in enumerate(tasks, start=1):
 
-            if task.action == "OPEN_APP":
+            print(
+                f"{i}. "
+                f"{task.skill} -> "
+                f"{task.action} "
+                f"({task.entity})"
+            )
 
-                print("\n========== EXECUTOR ==========")
-                print("Target :", task.target)
-
-                path = self.resolver.resolve(task.target)
-
-                print("Resolved Path :", path)
-
-                if path:
-
-                    result = self.launcher.open(path)
-
-                    print("Launch Result :", result)
-
-                    if result:
-                        task.complete()
-                    else:
-                        task.fail()
-
-                else:
-
-                    print("Application not found.")
-                    task.fail()
-
-                print("==============================")
-
-            elif task.action == "CREATE_FOLDER":
-
-                success = self.filesystem.create_folder(task.target)
-
-                if success:
-                    print(f"✅ Folder created : {task.target}")
-                    task.complete()
-                else:
-                    task.fail()
-
-            elif task.action == "CREATE_FILE":
-
-                success = self.filesystem.create_file(task.target)
-
-                if success:
-                    print(f"✅ File created : {task.target}")
-                    task.complete()
-                else:
-                    task.fail()
-
-            elif task.action == "RUN_COMMAND":
-
-                success = self.terminal.run(
-                    task.target,
-                    cwd=task.params.get("cwd")
-                )
-
-                if success:
-                    task.complete()
-                else:
-                    task.fail()
-
-        return tasks
+        print("==========================\n")

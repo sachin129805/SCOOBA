@@ -1,36 +1,21 @@
 {
-    "assistant": {
-        "name": "SCOOBA",
-        "version": "0.6.0",
-        "developer": "Sachin"
-    },
+    "workspace": "C:/Users/sachi/Documents/SCOOBA_Workspace",
 
     "voice": {
-        "enabled": true,
-        "wake_word": "",
-        "language": "en",
-        "speaker_verification": false
+        "provider": "faster-whisper",
+        "model": "base",
+        "language": "en"
     },
 
-    "memory": {
-        "remember_only_on_command": true
-    },
-
-    "startup": {
-        "background_mode": true,
-        "run_on_windows_start": false
+    "developer": {
+        "default_ide": "vscode",
+        "create_git": true,
+        "create_venv": true,
+        "open_after_create": true
     },
 
     "logging": {
-        "level": "INFO"
-    },
-
-    "services": {
-        "logger": true,
-        "voice": false,
-        "memory": false,
-        "vision": false,
-        "automation": false,
-        "ai": false
+        "level": "INFO",
+        "file": "logs/scooba.log"
     }
 }

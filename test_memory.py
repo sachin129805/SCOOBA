@@ -2,8 +2,22 @@ from memory.manager import MemoryManager
 
 memory = MemoryManager()
 
-memory.remember("name", "Sachin")
-memory.remember("assistant", "SCOOBA")
+memory.remember_project(
 
-print(memory.recall("name"))
-print(memory.recall("assistant"))
+    "VisionAI",
+
+    "C:/Users/sachi/Documents/SCOOBA_Workspace/VisionAI",
+
+    "Python"
+
+)
+
+print(
+
+    memory.find_project(
+
+        "VisionAI"
+
+    )
+
+)

@@ -15,26 +15,42 @@ class FileSystemSkill:
 
     def create_folder(self, name):
 
-        path = Path(name)
+        try:
 
-        path.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+            path = Path(name)
 
-        return path.exists()
+            path.mkdir(
+                parents=True,
+                exist_ok=True
+            )
+
+            return True
+
+        except Exception as e:
+
+            print(f"❌ {e}")
+
+            return False
 
     def create_file(self, filename):
 
-        path = Path(filename)
+        try:
 
-        path.parent.mkdir(
-            parents=True,
-            exist_ok=True
-        )
+            path = Path(filename)
 
-        path.touch(
-            exist_ok=True
-        )
+            path.parent.mkdir(
+                parents=True,
+                exist_ok=True
+            )
 
-        return path.exists()
+            path.touch(
+                exist_ok=True
+            )
+
+            return True
+
+        except Exception as e:
+
+            print(f"❌ {e}")
+
+            return False

@@ -2,34 +2,18 @@
 ==================================================
 SCOOBA
 
-Task Model
+Task
 
 Author: Sachin
 ==================================================
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
 class Task:
 
+    skill: str
     action: str
-
-    target: str = ""
-
-    params: dict = field(default_factory=dict)
-
-    status: str = "PENDING"
-
-    def complete(self):
-
-        self.status = "DONE"
-
-    def fail(self):
-
-        self.status = "FAILED"
-
-    def __str__(self):
-
-        return f"{self.action} -> {self.target} [{self.status}]"
+    entity: str = None

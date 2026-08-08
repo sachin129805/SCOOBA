@@ -4,12 +4,11 @@ SCOOBA
 
 Audio Recorder
 
-Purpose:
-Records microphone input.
-
 Author: Sachin
 ==================================================
 """
+
+import tempfile
 
 import sounddevice as sd
 import soundfile as sf
@@ -17,28 +16,35 @@ import soundfile as sf
 
 class AudioRecorder:
 
-    def record(
-        self,
-        filename="recording.wav",
-        duration=5,
-        sample_rate=44100
-    ):
+    def __init__(self):
 
-        print("\n🎙 Recording...")
+        self.sample_rate = 16000
+        self.channels = 1
+
+    def record(self, duration=5):
+
+        print("\n🎤 Listening...")
 
         audio = sd.rec(
-            int(duration * sample_rate),
-            samplerate=sample_rate,
-            channels=1,
+            int(duration * self.sample_rate),
+            samplerate=self.sample_rate,
+            channels=self.channels,
             dtype="float32"
         )
 
         sd.wait()
 
-        sf.write(
-            filename,
-            audio,
-            sample_rate
+        temp = tempfile.NamedTemporaryFile(
+            suffix=".wav",
+            delete=False
         )
 
-        print("✅ Recording saved.")
+        sf.write(
+            temp.name,
+            audio,
+            self.sample_rate
+        )
+
+        print("✅ Recording complete.")
+
+        return temp.name

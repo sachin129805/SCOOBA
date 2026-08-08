@@ -2,98 +2,73 @@
 ==================================================
 SCOOBA
 
-Task Planner
+Planner
 
 Author: Sachin
 ==================================================
 """
-
-import re
 
 from planner.task import Task
 
 
 class Planner:
 
-    def create_plan(self, text: str):
-
-        text = text.lower().strip()
+    def create_plan(self, decision):
 
         tasks = []
 
-        # ----------------------------
-        # OPEN APPLICATION
-        # ----------------------------
+        if decision.intent == "OPEN_APP":
 
-        if text.startswith("open "):
-
-            app = text.replace("open ", "", 1).strip()
-
-            return [
-                Task("OPEN_APP", app)
-            ]
-
-        # ----------------------------
-        # SEARCH WEB
-        # ----------------------------
-
-        if text.startswith("search "):
-
-            query = text.replace("search ", "", 1).strip()
-
-            return [
-                Task("SEARCH_WEB", query)
-            ]
-
-        # ----------------------------
-        # CREATE PYTHON PROJECT
-        # ----------------------------
-
-        if "python project" in text:
-
-            match = re.search(
-                r"(?:called|named)\s+([a-zA-Z0-9_-]+)",
-                text
+            tasks.append(
+                Task(
+                    skill="desktop",
+                    action="open",
+                    entity=decision.entity
+                )
             )
 
-            project = "PythonProject"
+        elif decision.intent == "CREATE_FOLDER":
 
-            if match:
+            tasks.append(
+                Task(
+                    skill="filesystem",
+                    action="create_folder",
+                    entity=decision.entity
+                )
+            )
 
-                project = match.group(1)
+        elif decision.intent == "CREATE_FILE":
 
-            return [
+            tasks.append(
+                Task(
+                    skill="filesystem",
+                    action="create_file",
+                    entity=decision.entity
+                )
+            )
 
-                Task("OPEN_APP", "visual studio code"),
+        elif decision.intent == "CREATE_PYTHON_PROJECT":
 
-                Task("CREATE_FOLDER", project),
+            tasks.extend([
 
                 Task(
-                    "RUN_COMMAND",
-                    "python -m venv .venv",
-                    {
-                        "cwd": project
-                    }
+                    "developer",
+                    "create_project",
+                    decision.entity
                 ),
 
                 Task(
-                    "CREATE_FILE",
-                    f"{project}/main.py"
+                    "developer",
+                    "create_venv",
+                    decision.entity
                 ),
 
                 Task(
-                    "CREATE_FILE",
-                    f"{project}/requirements.txt"
-                ),
-
-                Task(
-                    "RUN_COMMAND",
-                    "code .",
-                    {
-                        "cwd": project
-                    }
+                    "developer",
+                    "open_cursor",
+                    decision.entity
                 )
 
-            ]
+            ])
 
         return tasks

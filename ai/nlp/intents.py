@@ -30,6 +30,32 @@ INTENTS = {
         "description": "Close a running application"
     },
 
+    "CREATE_PYTHON_PROJECT": {
+        "verbs": [
+            "create",
+            "make",
+            "generate",
+            "build"
+        ],
+        "description": "Create a new Python project"
+    },
+
+    "CREATE_FOLDER": {
+        "verbs": [
+            "create folder",
+            "make folder"
+        ],
+        "description": "Create a new folder"
+    },
+
+    "CREATE_FILE": {
+        "verbs": [
+            "create file",
+            "make file"
+        ],
+        "description": "Create a new file"
+    },
+
     "GREETING": {
         "verbs": [
             "hello",

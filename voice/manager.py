@@ -4,22 +4,19 @@ SCOOBA
 
 Voice Manager
 
+Author: Sachin
 ==================================================
 """
 
-from voice.audio.stream import AudioStream
 from voice.audio.devices import AudioDeviceManager
 from voice.audio.recorder import AudioRecorder
 from voice.audio.player import AudioPlayer
 
 from voice.pipeline import VoicePipeline
 
-# 👇 CHANGE IS HERE
 from voice.tts.manager import TTSManager
 
-from voice.speech.providers.vosk_provider import (
-    VoskSpeechProvider
-)
+from voice.transcriber import SpeechTranscriber
 
 
 class VoiceManager:
@@ -34,13 +31,11 @@ class VoiceManager:
 
         self.player = AudioPlayer()
 
-        self.stream = AudioStream()
-
-        self.speech = VoskSpeechProvider()
+        self.transcriber = SpeechTranscriber()
 
         self.pipeline = VoicePipeline(
-            self.stream,
-            self.speech
+            self.recorder,
+            self.transcriber
         )
 
     def greet(self):
@@ -57,9 +52,9 @@ class VoiceManager:
 
         input("\nPress ENTER to start recording...")
 
-        self.recorder.record()
+        audio = self.recorder.record(5)
 
-        self.player.play("recording.wav")
+        self.player.play(audio)
 
     def listen(self):
 

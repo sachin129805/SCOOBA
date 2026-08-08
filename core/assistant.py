@@ -4,6 +4,7 @@ SCOOBA
 
 Main Assistant Controller
 
+Author: Sachin
 ==================================================
 """
 
@@ -24,6 +25,9 @@ from ai.engine import AIEngine
 from skills.manager import SkillManager
 from ai.dispatcher import AIDispatcher
 
+from planner.planner import Planner
+from planner.executor import Executor
+
 
 class SCOOBA:
 
@@ -33,7 +37,9 @@ class SCOOBA:
 
         self.config = ConfigManager()
 
-        self.service_manager = ServiceManager(self.config)
+        self.service_manager = ServiceManager(
+            self.config
+        )
 
         self.logger_service = LoggerService()
 
@@ -47,60 +53,164 @@ class SCOOBA:
 
         self.dispatcher = AIDispatcher()
 
+        self.planner = Planner()
+
+        self.executor = Executor()
+
         self.state = AssistantState.BOOTING
+
+        # ---------------------------------
+        # Register Services
+        # ---------------------------------
 
         self.service_manager.register(
             "Logger Service",
             self.logger_service
         )
 
-        self.container.register("config", self.config)
-        self.container.register("logger", logger)
-        self.container.register("service_manager", self.service_manager)
-        self.container.register("voice", self.voice)
-        self.container.register("brain", self.brain)
-        self.container.register("ai", self.ai)
-        self.container.register("skills", self.skills)
+        self.container.register(
+            "config",
+            self.config
+        )
 
-        self.name = self.config.get("assistant.name")
-        self.version = self.config.get("assistant.version")
+        self.container.register(
+            "logger",
+            logger
+        )
 
-    def set_state(self, state: AssistantState):
+        self.container.register(
+            "service_manager",
+            self.service_manager
+        )
+
+        self.container.register(
+            "voice",
+            self.voice
+        )
+
+        self.container.register(
+            "brain",
+            self.brain
+        )
+
+        self.container.register(
+            "ai",
+            self.ai
+        )
+
+        self.container.register(
+            "skills",
+            self.skills
+        )
+
+        self.container.register(
+            "planner",
+            self.planner
+        )
+
+        self.container.register(
+            "executor",
+            self.executor
+        )
+
+        # ---------------------------------
+        # Configuration
+        # ---------------------------------
+
+        self.name = self.config.get(
+            "assistant.name"
+        )
+
+        self.version = self.config.get(
+            "assistant.version"
+        )
+
+    def set_state(
+        self,
+        state: AssistantState
+    ):
 
         self.state = state
 
-        logger.info(f"SCOOBA State -> {state.value}")
+        logger.info(
+            f"SCOOBA State -> {state.value}"
+        )
 
     def start(self):
 
-        self.set_state(AssistantState.BOOTING)
+        # ---------------------------------
+        # BOOT
+        # ---------------------------------
 
-        logger.info("SCOOBA boot sequence started.")
+        self.set_state(
+            AssistantState.BOOTING
+        )
+
+        logger.info(
+            "SCOOBA boot sequence started."
+        )
 
         self.service_manager.start_all()
 
         print("=" * 50)
-        print(f"{self.name} v{self.version}")
+
+        print(
+            f"{self.name} v{self.version}"
+        )
+
         print("=" * 50)
 
-        self.set_state(AssistantState.SPEAKING)
+        # ---------------------------------
+        # GREETING
+        # ---------------------------------
+
+        self.set_state(
+            AssistantState.SPEAKING
+        )
 
         self.voice.greet()
 
-        self.set_state(AssistantState.READY)
+        self.set_state(
+            AssistantState.READY
+        )
 
-        print(f"\n🟢 Current State : {self.state.value}")
+        print(
+            f"\n🟢 Current State : "
+            f"{self.state.value}"
+        )
 
-        print("\n🎤 Available Microphones\n")
+        # ---------------------------------
+        # MICROPHONES
+        # ---------------------------------
 
-        microphones = self.voice.list_microphones()
+        print(
+            "\n🎤 Available Microphones\n"
+        )
 
-        for i, mic in enumerate(microphones, start=1):
+        microphones = (
+            self.voice.list_microphones()
+        )
 
-            print(f"[{i}] {mic['name']}")
+        for i, mic in enumerate(
+            microphones,
+            start=1
+        ):
 
-        print("\n🚀 SCOOBA is ready.")
-        print("Say 'exit' to stop.\n")
+            print(
+                f"[{i}] {mic['name']}"
+            )
+
+        print(
+            "\n🚀 SCOOBA is ready."
+        )
+
+        print(
+            "Say 'exit' to stop.\n"
+        )
+
+        # ---------------------------------
+        # MAIN LOOP
+        # ---------------------------------
 
         try:
 
@@ -117,15 +227,47 @@ class SCOOBA:
                 )
 
                 if not text:
+
                     continue
 
-                print(f"\n📝 Recognized : {text}")
+                print(
+                    f"\n📝 Recognized : {text}"
+                )
 
-                if text.lower() in [
+                # ---------------------------------
+                # AI Decision
+                # ---------------------------------
+
+                decision = self.ai.think(
+                    text
+                )
+
+                # ---------------------------------
+                # EXIT DETECTION
+                # ---------------------------------
+
+                normalized_text = (
+                    text
+                    .lower()
+                    .strip()
+                    .rstrip(
+                        "!.,?;:"
+                    )
+                )
+
+                exit_commands = [
                     "exit",
                     "quit",
-                    "stop"
-                ]:
+                    "stop",
+                    "goodbye"
+                ]
+
+                if (
+                    normalized_text
+                    in exit_commands
+                    or decision.intent
+                    == "CLOSE_APP"
+                ):
 
                     self.set_state(
                         AssistantState.SPEAKING
@@ -135,34 +277,57 @@ class SCOOBA:
                         "Goodbye, CTO."
                     )
 
-                    print("\n👋 SCOOBA shutting down.")
+                    print(
+                        "\n👋 SCOOBA "
+                        "shutting down."
+                    )
 
                     logger.info(
                         "SCOOBA stopped."
                     )
 
+                    self.set_state(
+                        AssistantState.READY
+                    )
+
                     break
 
-                # -------------------------------
-                # AI Decision
-                # -------------------------------
+                # ---------------------------------
+                # Planning
+                # ---------------------------------
 
-                decision = self.ai.think(text)
-
-                # -------------------------------
-                # Execute Skill
-                # -------------------------------
-
-                success = self.skills.execute(
-                    decision
+                plan = (
+                    self.planner.create_plan(
+                        decision
+                    )
                 )
 
-                # -------------------------------
-                # Personality Response
-                # -------------------------------
+                # ---------------------------------
+                # Execute Plan
+                # ---------------------------------
 
-                response = self.dispatcher.response(
-                    decision
+                self.executor.execute(
+                    plan
+                )
+
+                # ---------------------------------
+                # Execute Skill
+                # ---------------------------------
+
+                success = (
+                    self.skills.execute(
+                        decision
+                    )
+                )
+
+                # ---------------------------------
+                # Personality Response
+                # ---------------------------------
+
+                response = (
+                    self.dispatcher.response(
+                        decision
+                    )
                 )
 
                 self.set_state(
@@ -179,7 +344,9 @@ class SCOOBA:
 
         except KeyboardInterrupt:
 
-            print("\n\n👋 SCOOBA interrupted.")
+            print(
+                "\n\n👋 SCOOBA interrupted."
+            )
 
             logger.info(
                 "SCOOBA interrupted by user."

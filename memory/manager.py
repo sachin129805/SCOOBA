@@ -1,51 +1,89 @@
 """
-==================================================
+=========================================================
 SCOOBA
 
 Memory Manager
 
-Author: Sachin
-==================================================
+Author : Sachin
+=========================================================
 """
 
 import json
-import os
+from pathlib import Path
 
 
 class MemoryManager:
 
-    FILE = "memory/storage.json"
-
     def __init__(self):
 
-        if not os.path.exists(self.FILE):
+        self.path = Path(__file__).parent / "database.json"
 
-            with open(self.FILE, "w") as f:
-
-                json.dump({}, f)
+        self.load()
 
     def load(self):
 
-        with open(self.FILE, "r") as f:
+        with open(
+            self.path,
+            "r",
+            encoding="utf-8"
+        ) as file:
 
-            return json.load(f)
+            self.data = json.load(file)
 
-    def save(self, data):
+    def save(self):
 
-        with open(self.FILE, "w") as f:
+        with open(
+            self.path,
+            "w",
+            encoding="utf-8"
+        ) as file:
 
-            json.dump(data, f, indent=4)
+            json.dump(
+                self.data,
+                file,
+                indent=4
+            )
 
-    def remember(self, key, value):
+    def remember_project(
 
-        data = self.load()
+        self,
 
-        data[key] = value
+        name,
 
-        self.save(data)
+        path,
 
-    def recall(self, key):
+        language
 
-        data = self.load()
+    ):
 
-        return data.get(key)
+        self.data["projects"].append(
+
+            {
+
+                "name": name,
+
+                "path": str(path),
+
+                "language": language
+
+            }
+
+        )
+
+        self.save()
+
+    def find_project(
+
+        self,
+
+        name
+
+    ):
+
+        for project in self.data["projects"]:
+
+            if project["name"].lower() == name.lower():
+
+                return project
+
+        return None

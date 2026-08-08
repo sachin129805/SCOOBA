@@ -8,9 +8,8 @@ Author: Sachin
 ==================================================
 """
 
-from launcher.resolver import ApplicationResolver
-from launcher.windows_launcher import WindowsLauncher
-from launcher.learning import ApplicationLearning
+from launcher.v4.resolver import ApplicationResolver
+from launcher.v4.launcher import WindowsLauncher
 
 
 class DesktopSkill:
@@ -19,7 +18,6 @@ class DesktopSkill:
 
         self.resolver = ApplicationResolver()
         self.launcher = WindowsLauncher()
-        self.learning = ApplicationLearning()
 
     def open(self, app_name: str) -> bool:
 
@@ -28,37 +26,17 @@ class DesktopSkill:
         print("\n========== DESKTOP ==========")
         print("Requested :", app_name)
 
-        # -----------------------------
-        # Try Existing Database
-        # -----------------------------
+        app = self.resolver.resolve(app_name)
 
-        path = self.resolver.resolve(app_name)
+        print("Resolver Returned :", app)
 
-        # -----------------------------
-        # Learn if Missing
-        # -----------------------------
-
-        if path is None:
+        if app is None:
 
             print("Application not found.")
-            print("Opening file picker...")
+            print("=============================\n")
+            return False
 
-            path = self.learning.learn(app_name)
-
-            if path is None:
-
-                print("Learning cancelled.")
-                print("=============================\n")
-
-                return False
-
-        print("Resolved :", path)
-
-        # -----------------------------
-        # Launch
-        # -----------------------------
-
-        success = self.launcher.open(path)
+        success = self.launcher.open(app)
 
         print("Launch :", success)
         print("=============================\n")
