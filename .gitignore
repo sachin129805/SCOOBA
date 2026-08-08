@@ -13,6 +13,14 @@ logs/*.log
 data/temp/
 *.wav
 
+# Models
+models/
+*.onnx
+*.onnx.json
+
+# Bundled tools / runtimes
+tools/
+
 # IDE
 .vscode/
 .idea/
