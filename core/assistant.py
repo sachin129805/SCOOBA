@@ -33,6 +33,10 @@ class SCOOBA:
 
     def __init__(self):
 
+        # ---------------------------------
+        # Core Services
+        # ---------------------------------
+
         self.container = ServiceContainer()
 
         self.config = ConfigManager()
@@ -42,6 +46,10 @@ class SCOOBA:
         )
 
         self.logger_service = LoggerService()
+
+        # ---------------------------------
+        # SCOOBA Components
+        # ---------------------------------
 
         self.voice = VoiceManager()
 
@@ -55,7 +63,18 @@ class SCOOBA:
 
         self.planner = Planner()
 
-        self.executor = Executor()
+        # IMPORTANT:
+        #
+        # Executor uses the SAME SkillManager
+        # instance as SCOOBA.
+        #
+        self.executor = Executor(
+            self.skills
+        )
+
+        # ---------------------------------
+        # State
+        # ---------------------------------
 
         self.state = AssistantState.BOOTING
 
@@ -125,6 +144,10 @@ class SCOOBA:
             "assistant.version"
         )
 
+    # ==================================================
+    # STATE
+    # ==================================================
+
     def set_state(
         self,
         state: AssistantState
@@ -135,6 +158,10 @@ class SCOOBA:
         logger.info(
             f"SCOOBA State -> {state.value}"
         )
+
+    # ==================================================
+    # START
+    # ==================================================
 
     def start(self):
 
@@ -216,6 +243,10 @@ class SCOOBA:
 
             while True:
 
+                # ---------------------------------
+                # LISTENING
+                # ---------------------------------
+
                 self.set_state(
                     AssistantState.LISTENING
                 )
@@ -235,7 +266,7 @@ class SCOOBA:
                 )
 
                 # ---------------------------------
-                # AI Decision
+                # AI DECISION
                 # ---------------------------------
 
                 decision = self.ai.think(
@@ -265,7 +296,8 @@ class SCOOBA:
                 if (
                     normalized_text
                     in exit_commands
-                    or decision.intent
+                    or
+                    decision.intent
                     == "CLOSE_APP"
                 ):
 
@@ -293,7 +325,7 @@ class SCOOBA:
                     break
 
                 # ---------------------------------
-                # Planning
+                # PLANNING
                 # ---------------------------------
 
                 plan = (
@@ -303,25 +335,32 @@ class SCOOBA:
                 )
 
                 # ---------------------------------
-                # Execute Plan
+                # EXECUTION
                 # ---------------------------------
-
-                self.executor.execute(
-                    plan
-                )
-
-                # ---------------------------------
-                # Execute Skill
-                # ---------------------------------
+                #
+                # IMPORTANT:
+                #
+                # The Executor now handles
+                # the complete task execution.
+                #
+                # DO NOT call:
+                #
+                # self.skills.execute(decision)
+                #
+                # here.
+                #
+                # Otherwise the command could
+                # execute twice.
+                #
 
                 success = (
-                    self.skills.execute(
-                        decision
+                    self.executor.execute(
+                        plan
                     )
                 )
 
                 # ---------------------------------
-                # Personality Response
+                # PERSONALITY RESPONSE
                 # ---------------------------------
 
                 response = (
@@ -330,17 +369,27 @@ class SCOOBA:
                     )
                 )
 
+                # ---------------------------------
+                # SPEAK RESPONSE
+                # ---------------------------------
+
                 self.set_state(
                     AssistantState.SPEAKING
                 )
 
-                self.voice.tts.speak(
-                    response
-                )
+                if response:
+
+                    self.voice.tts.speak(
+                        response
+                    )
 
                 self.set_state(
                     AssistantState.READY
                 )
+
+        # ---------------------------------
+        # KEYBOARD INTERRUPT
+        # ---------------------------------
 
         except KeyboardInterrupt:
 
@@ -350,4 +399,8 @@ class SCOOBA:
 
             logger.info(
                 "SCOOBA interrupted by user."
+            )
+
+            self.set_state(
+                AssistantState.READY
             )
