@@ -1,20 +1,63 @@
+from ai.engine import AIEngine
 from planner.planner import Planner
 from planner.executor import Executor
+from skills.manager import SkillManager
+
+
+# ---------------------------------
+# Initialize
+# ---------------------------------
+
+ai = AIEngine()
 
 planner = Planner()
 
-executor = Executor()
+skills = SkillManager()
 
-tasks = planner.create_plan("Open Chrome")
+executor = Executor(
+    skills
+)
 
-executor.execute(tasks)
 
-print()
+# ---------------------------------
+# Command
+# ---------------------------------
 
-print("Final Status")
+command = "search youtube for Avicii"
 
-print("----------------")
 
-for task in tasks:
+# ---------------------------------
+# AI
+# ---------------------------------
 
-    print(task)
+print("\n========== COMMAND ==========")
+print(command)
+print("=============================\n")
+
+decision = ai.think(
+    command
+)
+
+
+# ---------------------------------
+# Planning
+# ---------------------------------
+
+tasks = planner.create_plan(
+    decision
+)
+
+
+# ---------------------------------
+# Execution
+# ---------------------------------
+
+success = executor.execute(
+    tasks
+)
+
+
+print(
+    f"\nFinal Result: "
+    f"{'SUCCESS' if success else 'FAILED'}"
+)

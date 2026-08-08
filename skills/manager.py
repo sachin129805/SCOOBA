@@ -23,9 +23,181 @@ class SkillManager:
 
         self.filesystem = FileSystemSkill()
 
+    # ==================================================
+    # TASK EXECUTION
+    # ==================================================
+
+    def execute_task(self, task):
+
+        print(
+            f"\n⚙ Executing Task: "
+            f"{task.skill} -> "
+            f"{task.action} "
+            f"({task.entity})"
+        )
+
+        # ---------------------------------------------
+        # BROWSER
+        # ---------------------------------------------
+
+        if task.skill == "browser":
+
+            target = (
+                task.entity
+                or "google"
+            ).lower().strip()
+
+            # -----------------------------------------
+            # Open
+            # -----------------------------------------
+
+            if task.action == "open":
+
+                if target == "youtube":
+
+                    return self.browser.youtube()
+
+                elif target == "google":
+
+                    return self.browser.open_url(
+                        "https://www.google.com"
+                    )
+
+                elif target == "github":
+
+                    return self.browser.github()
+
+                elif target == "gmail":
+
+                    return self.browser.gmail()
+
+                elif target == "chatgpt":
+
+                    return self.browser.chatgpt()
+
+                return self.desktop.open(
+                    target
+                )
+
+            # -----------------------------------------
+            # Search
+            # -----------------------------------------
+
+            elif task.action == "search":
+
+                if not task.query:
+
+                    print(
+                        "⚠ Browser search requires "
+                        "a query."
+                    )
+
+                    return False
+
+                if target == "youtube":
+
+                    print(
+                        f"🔎 YouTube Search: "
+                        f"{task.query}"
+                    )
+
+                    return self.browser.youtube_search(
+                        task.query
+                    )
+
+                elif target == "google":
+
+                    print(
+                        f"🔎 Google Search: "
+                        f"{task.query}"
+                    )
+
+                    return self.browser.google_search(
+                        task.query
+                    )
+
+                print(
+                    f"🔎 Google Search: "
+                    f"{task.query}"
+                )
+
+                return self.browser.google_search(
+                    task.query
+                )
+
+            print(
+                f"⚠ Unknown browser action: "
+                f"{task.action}"
+            )
+
+            return False
+
+        # ---------------------------------------------
+        # FILESYSTEM
+        # ---------------------------------------------
+
+        if task.skill == "filesystem":
+
+            if task.action == "create_folder":
+
+                if not task.entity:
+
+                    return False
+
+                return self.filesystem.create_folder(
+                    task.entity
+                )
+
+            elif task.action == "create_file":
+
+                if not task.entity:
+
+                    return False
+
+                return self.filesystem.create_file(
+                    task.entity
+                )
+
+            print(
+                f"⚠ Unknown filesystem action: "
+                f"{task.action}"
+            )
+
+            return False
+
+        # ---------------------------------------------
+        # DEVELOPER
+        # ---------------------------------------------
+
+        if task.skill == "developer":
+
+            print(
+                f"⚠ Developer task not yet "
+                f"connected: {task.action}"
+            )
+
+            return False
+
+        # ---------------------------------------------
+        # UNKNOWN SKILL
+        # ---------------------------------------------
+
+        print(
+            f"⚠ Unknown skill: "
+            f"{task.skill}"
+        )
+
+        return False
+
+    # ==================================================
+    # LEGACY DECISION EXECUTION
+    # ==================================================
+
     def execute(self, decision):
 
-        print("\n========== DECISION ==========")
+        print(
+            "\n========== DECISION =========="
+        )
 
         print(
             f"Intent      : "
@@ -89,10 +261,6 @@ class SkillManager:
 
             target = target.lower().strip()
 
-            # ---------------------------------------------
-            # YouTube Search
-            # ---------------------------------------------
-
             if target == "youtube":
 
                 print(
@@ -104,10 +272,6 @@ class SkillManager:
                     query
                 )
 
-            # ---------------------------------------------
-            # Google Search
-            # ---------------------------------------------
-
             elif target == "google":
 
                 print(
@@ -118,15 +282,6 @@ class SkillManager:
                 return self.browser.google_search(
                     query
                 )
-
-            # ---------------------------------------------
-            # Default Search
-            # ---------------------------------------------
-
-            print(
-                f"🔎 Google Search: "
-                f"{query}"
-            )
 
             return self.browser.google_search(
                 query
@@ -152,76 +307,27 @@ class SkillManager:
                 .strip()
             )
 
-            # ---------------------------------------------
-            # YouTube
-            # ---------------------------------------------
-
             if entity == "youtube":
-
-                print(
-                    "▶ Opening YouTube..."
-                )
 
                 return self.browser.youtube()
 
-            # ---------------------------------------------
-            # Google
-            # ---------------------------------------------
-
             elif entity == "google":
-
-                print(
-                    "🌐 Opening Google..."
-                )
 
                 return self.browser.open_url(
                     "https://www.google.com"
                 )
 
-            # ---------------------------------------------
-            # GitHub
-            # ---------------------------------------------
-
             elif entity == "github":
-
-                print(
-                    "🐙 Opening GitHub..."
-                )
 
                 return self.browser.github()
 
-            # ---------------------------------------------
-            # Gmail
-            # ---------------------------------------------
-
             elif entity == "gmail":
-
-                print(
-                    "📧 Opening Gmail..."
-                )
 
                 return self.browser.gmail()
 
-            # ---------------------------------------------
-            # ChatGPT
-            # ---------------------------------------------
-
             elif entity == "chatgpt":
 
-                print(
-                    "🤖 Opening ChatGPT..."
-                )
-
                 return self.browser.chatgpt()
-
-            # ---------------------------------------------
-            # Desktop Application
-            # ---------------------------------------------
-
-            print(
-                f"🖥 Opening application: "
-                f"{entity}"
-            )
 
             return self.desktop.open(
                 entity
@@ -240,33 +346,11 @@ class SkillManager:
 
             if not folder_name:
 
-                print(
-                    "⚠ No folder name detected."
-                )
-
                 return False
 
-            success = (
-                self.filesystem.create_folder(
-                    folder_name
-                )
+            return self.filesystem.create_folder(
+                folder_name
             )
-
-            if success:
-
-                print(
-                    f"✅ Folder "
-                    f"'{folder_name}' created."
-                )
-
-            else:
-
-                print(
-                    f"❌ Failed to create folder "
-                    f"'{folder_name}'."
-                )
-
-            return success
 
         # --------------------------------------------------
         # CREATE FILE
@@ -281,33 +365,11 @@ class SkillManager:
 
             if not file_name:
 
-                print(
-                    "⚠ No file name detected."
-                )
-
                 return False
 
-            success = (
-                self.filesystem.create_file(
-                    file_name
-                )
+            return self.filesystem.create_file(
+                file_name
             )
-
-            if success:
-
-                print(
-                    f"✅ File "
-                    f"'{file_name}' created."
-                )
-
-            else:
-
-                print(
-                    f"❌ Failed to create file "
-                    f"'{file_name}'."
-                )
-
-            return success
 
         # --------------------------------------------------
         # CREATE PYTHON PROJECT
@@ -324,21 +386,12 @@ class SkillManager:
 
             if not project_name:
 
-                print(
-                    "⚠ No project name detected."
-                )
-
                 return False
 
             print(
                 f"🐍 Creating Python project: "
                 f"{project_name}"
             )
-
-            # TODO:
-            # self.developer.create_python_project(
-            #     project_name
-            # )
 
             return True
 

@@ -17,7 +17,32 @@ class Planner:
 
         tasks = []
 
-        if decision.intent == "OPEN_APP":
+        # ---------------------------------
+        # SEARCH
+        # ---------------------------------
+
+        if decision.intent == "SEARCH":
+
+            target = (
+                decision.target
+                or decision.entity
+                or "google"
+            )
+
+            tasks.append(
+                Task(
+                    skill="browser",
+                    action="search",
+                    entity=target,
+                    query=decision.query
+                )
+            )
+
+        # ---------------------------------
+        # OPEN APP
+        # ---------------------------------
+
+        elif decision.intent == "OPEN_APP":
 
             tasks.append(
                 Task(
@@ -26,6 +51,10 @@ class Planner:
                     entity=decision.entity
                 )
             )
+
+        # ---------------------------------
+        # CREATE FOLDER
+        # ---------------------------------
 
         elif decision.intent == "CREATE_FOLDER":
 
@@ -37,6 +66,10 @@ class Planner:
                 )
             )
 
+        # ---------------------------------
+        # CREATE FILE
+        # ---------------------------------
+
         elif decision.intent == "CREATE_FILE":
 
             tasks.append(
@@ -47,28 +80,70 @@ class Planner:
                 )
             )
 
+        # ---------------------------------
+        # CREATE PYTHON PROJECT
+        # ---------------------------------
+
         elif decision.intent == "CREATE_PYTHON_PROJECT":
+
+            project_name = (
+                decision.target
+                or decision.entity
+            )
 
             tasks.extend([
 
                 Task(
-                    "developer",
-                    "create_project",
-                    decision.entity
+                    skill="developer",
+                    action="create_project",
+                    entity=project_name
                 ),
 
                 Task(
-                    "developer",
-                    "create_venv",
-                    decision.entity
+                    skill="developer",
+                    action="create_venv",
+                    entity=project_name
                 ),
 
                 Task(
-                    "developer",
-                    "open_cursor",
-                    decision.entity
+                    skill="developer",
+                    action="open_cursor",
+                    entity=project_name
                 )
 
             ])
+
+        # ---------------------------------
+        # DEBUG PLAN
+        # ---------------------------------
+
+        print("\n========== PLAN ==========")
+
+        if not tasks:
+
+            print("No tasks generated.")
+
+        else:
+
+            for i, task in enumerate(
+                tasks,
+                start=1
+            ):
+
+                print(
+                    f"{i}. "
+                    f"{task.skill} -> "
+                    f"{task.action} "
+                    f"({task.entity})"
+                )
+
+                if task.query:
+
+                    print(
+                        f"   Query: "
+                        f"{task.query}"
+                    )
+
+        print("==========================\n")
 
         return tasks
