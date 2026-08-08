@@ -34,6 +34,8 @@ class NLPProcessor:
             "entity": None,
             "query": None,
             "target": None,
+            "action": None,
+            "location": None,
             "lemmas": [],
             "tokens": []
         }
@@ -77,6 +79,7 @@ class NLPProcessor:
             if site in text:
 
                 result["entity"] = site
+                result["target"] = site
 
                 break
 
@@ -84,32 +87,149 @@ class NLPProcessor:
         # Browser Search Query
         # ---------------------------------
 
-        search_markers = [
-            "search for",
-            "look for",
-            "search",
-            "find"
-        ]
+        if result["intent"] == "SEARCH":
 
-        for marker in search_markers:
+            query = None
 
-            if marker in text:
+            # ---------------------------------
+            # Pattern:
+            #
+            # search youtube for good day
+            # ---------------------------------
 
-                query = text.split(
-                    marker,
+            if "search " in text:
+
+                search_part = text.split(
+                    "search ",
                     1
                 )[1].strip()
 
-                # Remove trailing punctuation
+                if " for " in search_part:
+
+                    target_part, query_part = (
+                        search_part.split(
+                            " for ",
+                            1
+                        )
+                    )
+
+                    target_part = (
+                        target_part.strip()
+                    )
+
+                    query_part = (
+                        query_part.strip()
+                    )
+
+                    if target_part in browser_sites:
+
+                        result["entity"] = (
+                            target_part
+                        )
+
+                        result["target"] = (
+                            target_part
+                        )
+
+                        query = query_part
+
+                    else:
+
+                        query = search_part
+
+                else:
+
+                    query = search_part
+
+            # ---------------------------------
+            # Pattern:
+            #
+            # find cats on youtube
+            # ---------------------------------
+
+            elif "find " in text:
+
+                find_part = text.split(
+                    "find ",
+                    1
+                )[1].strip()
+
+                for site in browser_sites:
+
+                    suffix = (
+                        " on " + site
+                    )
+
+                    if find_part.endswith(
+                        suffix
+                    ):
+
+                        query = (
+                            find_part[
+                                :-len(suffix)
+                            ].strip()
+                        )
+
+                        result["entity"] = site
+                        result["target"] = site
+
+                        break
+
+                if query is None:
+
+                    query = find_part
+
+            # ---------------------------------
+            # Pattern:
+            #
+            # look for cats on youtube
+            # ---------------------------------
+
+            elif "look for " in text:
+
+                look_part = text.split(
+                    "look for ",
+                    1
+                )[1].strip()
+
+                for site in browser_sites:
+
+                    suffix = (
+                        " on " + site
+                    )
+
+                    if look_part.endswith(
+                        suffix
+                    ):
+
+                        query = (
+                            look_part[
+                                :-len(suffix)
+                            ].strip()
+                        )
+
+                        result["entity"] = site
+                        result["target"] = site
+
+                        break
+
+                if query is None:
+
+                    query = look_part
+
+            # ---------------------------------
+            # Clean Query
+            # ---------------------------------
+
+            if query:
+
                 query = query.rstrip(
                     ".,!?;:"
                 ).strip()
 
-                if query:
+                result["query"] = query
 
-                    result["query"] = query
-
-                break
+            result["action"] = "search"
 
         # ---------------------------------
         # File / Folder / Project
@@ -145,14 +265,39 @@ class NLPProcessor:
                     if entity:
 
                         result["entity"] = entity
+                        result["target"] = entity
 
                         break
+
+            # ---------------------------------
+            # Default Create Action
+            # ---------------------------------
+
+            result["action"] = "create"
+
+        # ---------------------------------
+        # Open App Action
+        # ---------------------------------
+
+        elif result["intent"] == "OPEN_APP":
+
+            result["action"] = "open"
+
+        # ---------------------------------
+        # Close App Action
+        # ---------------------------------
+
+        elif result["intent"] == "CLOSE_APP":
+
+            result["action"] = "close"
 
         # ---------------------------------
         # Debug
         # ---------------------------------
 
-        print("\n========== NLP DEBUG ==========")
+        print(
+            "\n========== NLP DEBUG =========="
+        )
 
         for token in doc:
 
@@ -163,10 +308,34 @@ class NLPProcessor:
             )
 
         print("--------------------------------")
-        print("Intent :", result["intent"])
-        print("Entity :", result["entity"])
-        print("Query  :", result["query"])
-        print("Target :", result["target"])
-        print("===============================\n")
+
+        print(
+            "Intent :",
+            result["intent"]
+        )
+
+        print(
+            "Entity :",
+            result["entity"]
+        )
+
+        print(
+            "Query  :",
+            result["query"]
+        )
+
+        print(
+            "Target :",
+            result["target"]
+        )
+
+        print(
+            "Action :",
+            result["action"]
+        )
+
+        print(
+            "===============================\n"
+        )
 
         return result

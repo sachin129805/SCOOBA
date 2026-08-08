@@ -2,7 +2,7 @@
 ==================================================
 SCOOBA
 
-Intent Classifier 3.0
+Intent Classifier 4.0
 
 Author: Sachin
 ==================================================
@@ -27,6 +27,13 @@ class IntentClassifier:
             "terminate"
         },
 
+        "SEARCH": {
+            "search",
+            "find",
+            "google",
+            "lookup"
+        },
+
         "CREATE": {
             "create",
             "make",
@@ -34,7 +41,6 @@ class IntentClassifier:
             "build",
             "new"
         }
-
     }
 
     OBJECTS = {
@@ -56,7 +62,6 @@ class IntentClassifier:
             "django",
             "fastapi"
         }
-
     }
 
     def classify(self, lemmas):
@@ -64,10 +69,19 @@ class IntentClassifier:
         words = set(lemmas)
 
         # -----------------------------
+        # Search
+        # -----------------------------
+
+        if words & self.VERBS["SEARCH"]:
+
+            return "SEARCH"
+
+        # -----------------------------
         # Open App
         # -----------------------------
 
         if words & self.VERBS["OPEN_APP"]:
+
             return "OPEN_APP"
 
         # -----------------------------
@@ -75,6 +89,7 @@ class IntentClassifier:
         # -----------------------------
 
         if words & self.VERBS["CLOSE_APP"]:
+
             return "CLOSE_APP"
 
         # -----------------------------
@@ -82,6 +97,7 @@ class IntentClassifier:
         # -----------------------------
 
         if {"hi", "hello", "hey"} & words:
+
             return "GREETING"
 
         # -----------------------------
@@ -91,12 +107,15 @@ class IntentClassifier:
         if words & self.VERBS["CREATE"]:
 
             if words & self.OBJECTS["CREATE_FOLDER"]:
+
                 return "CREATE_FOLDER"
 
             if words & self.OBJECTS["CREATE_FILE"]:
+
                 return "CREATE_FILE"
 
             if words & self.OBJECTS["CREATE_PYTHON_PROJECT"]:
+
                 return "CREATE_PYTHON_PROJECT"
 
         return None

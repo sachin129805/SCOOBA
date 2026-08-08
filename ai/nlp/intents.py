@@ -30,6 +30,16 @@ INTENTS = {
         "description": "Close a running application"
     },
 
+    "SEARCH": {
+        "verbs": [
+            "search",
+            "find",
+            "look for",
+            "google"
+        ],
+        "description": "Search for information using a target service"
+    },
+
     "CREATE_PYTHON_PROJECT": {
         "verbs": [
             "create",
@@ -64,5 +74,4 @@ INTENTS = {
         ],
         "description": "Greeting the assistant"
     }
-
 }
