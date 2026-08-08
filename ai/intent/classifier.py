@@ -2,7 +2,7 @@
 ==================================================
 SCOOBA
 
-Intent Classifier 4.0
+Intent Classifier 5.0
 
 Author: Sachin
 ==================================================
@@ -32,6 +32,11 @@ class IntentClassifier:
             "find",
             "google",
             "lookup"
+        },
+
+        "PLAY_VIDEO": {
+            "play",
+            "watch"
         },
 
         "CREATE": {
@@ -75,6 +80,14 @@ class IntentClassifier:
         if words & self.VERBS["SEARCH"]:
 
             return "SEARCH"
+
+        # -----------------------------
+        # Play Video
+        # -----------------------------
+
+        if words & self.VERBS["PLAY_VIDEO"]:
+
+            return "PLAY_VIDEO"
 
         # -----------------------------
         # Open App

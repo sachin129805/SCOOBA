@@ -23,103 +23,124 @@ class Planner:
         ).lower().strip()
 
         # ---------------------------------
+        # PLAY VIDEO
+        # ---------------------------------
+
+        if decision.intent == "PLAY_VIDEO":
+
+            query = decision.query
+
+            if query:
+
+                tasks.append(
+                    Task(
+                        skill="browser",
+                        action="play_first",
+                        entity=(
+                            decision.target
+                            or "youtube"
+                        ),
+                        query=query
+                    )
+                )
+
+        # ---------------------------------
         # MULTI-STEP BROWSER SEARCH
         # ---------------------------------
-        #
-        # Example:
-        #
-        # "open youtube and search avicii"
-        #
-        # Becomes:
-        #
-        # Task 1 -> open youtube
-        # Task 2 -> search youtube for avicii
-        #
 
-        compound_markers = [
-            " and search for ",
-            " and search ",
-            " and find ",
-            " and look for "
-        ]
-
-        compound_marker = None
-
-        for marker in compound_markers:
-
-            if marker in command:
-
-                compound_marker = marker
-
-                break
-
-        if (
+        elif (
             decision.intent == "SEARCH"
-            and compound_marker
-            and decision.entity
-            and decision.query
         ):
 
-            # ---------------------------------
-            # OPEN TASK
-            # ---------------------------------
+            compound_markers = [
+                " and search for ",
+                " and search ",
+                " and find ",
+                " and look for "
+            ]
 
-            opening_part = command.split(
-                compound_marker,
-                1
-            )[0].strip()
+            compound_marker = None
 
-            opening_part = (
-                opening_part
-                .replace("open ", "", 1)
-                .replace("launch ", "", 1)
-                .replace("start ", "", 1)
-                .replace("run ", "", 1)
-                .strip()
-            )
+            for marker in compound_markers:
 
-            tasks.append(
-                Task(
-                    skill="browser",
-                    action="open",
-                    entity=opening_part
+                if marker in command:
+
+                    compound_marker = marker
+
+                    break
+
+            if (
+                compound_marker
+                and decision.entity
+                and decision.query
+            ):
+
+                opening_part = command.split(
+                    compound_marker,
+                    1
+                )[0].strip()
+
+                opening_part = (
+                    opening_part
+                    .replace(
+                        "open ",
+                        "",
+                        1
+                    )
+                    .replace(
+                        "launch ",
+                        "",
+                        1
+                    )
+                    .replace(
+                        "start ",
+                        "",
+                        1
+                    )
+                    .replace(
+                        "run ",
+                        "",
+                        1
+                    )
+                    .strip()
                 )
-            )
 
-            # ---------------------------------
-            # SEARCH TASK
-            # ---------------------------------
-
-            tasks.append(
-                Task(
-                    skill="browser",
-                    action="search",
-                    entity=decision.target
-                    or decision.entity,
-                    query=decision.query
+                tasks.append(
+                    Task(
+                        skill="browser",
+                        action="open",
+                        entity=opening_part
+                    )
                 )
-            )
 
-        # ---------------------------------
-        # NORMAL SEARCH
-        # ---------------------------------
-
-        elif decision.intent == "SEARCH":
-
-            target = (
-                decision.target
-                or decision.entity
-                or "google"
-            )
-
-            tasks.append(
-                Task(
-                    skill="browser",
-                    action="search",
-                    entity=target,
-                    query=decision.query
+                tasks.append(
+                    Task(
+                        skill="browser",
+                        action="search",
+                        entity=(
+                            decision.target
+                            or decision.entity
+                        ),
+                        query=decision.query
+                    )
                 )
-            )
+
+            else:
+
+                target = (
+                    decision.target
+                    or decision.entity
+                    or "google"
+                )
+
+                tasks.append(
+                    Task(
+                        skill="browser",
+                        action="search",
+                        entity=target,
+                        query=decision.query
+                    )
+                )
 
         # ---------------------------------
         # OPEN APP
@@ -167,7 +188,10 @@ class Planner:
         # CREATE PYTHON PROJECT
         # ---------------------------------
 
-        elif decision.intent == "CREATE_PYTHON_PROJECT":
+        elif (
+            decision.intent
+            == "CREATE_PYTHON_PROJECT"
+        ):
 
             project_name = (
                 decision.target

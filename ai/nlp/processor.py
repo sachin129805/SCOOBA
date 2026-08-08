@@ -84,16 +84,102 @@ class NLPProcessor:
                 break
 
         # ---------------------------------
-        # Browser Search Query
+        # PLAY VIDEO
         # ---------------------------------
 
-        if result["intent"] == "SEARCH":
+        if result["intent"] == "PLAY_VIDEO":
 
-            query = None
+            result["action"] = "play"
+
+            # ---------------------------------
+            # Determine YouTube
+            # ---------------------------------
+
+            result["entity"] = "youtube"
+            result["target"] = "youtube"
 
             # ---------------------------------
             # Pattern:
             #
+            # sb737 and play the first video
+            # ---------------------------------
+
+            if " and play " in text:
+
+                query_part = text.split(
+                    " and play ",
+                    1
+                )[0].strip()
+
+                if query_part:
+
+                    result["query"] = query_part
+
+            # ---------------------------------
+            # Pattern:
+            #
+            # play avicii the nights
+            # ---------------------------------
+
+            elif text.startswith("play "):
+
+                query_part = text[
+                    len("play "):
+                ].strip()
+
+                # Remove "the first video"
+                # when explicitly present.
+
+                suffixes = [
+                    " and play the first video",
+                    " play the first video",
+                    " and play first video",
+                    " play first video"
+                ]
+
+                for suffix in suffixes:
+
+                    if query_part.endswith(
+                        suffix
+                    ):
+
+                        query_part = (
+                            query_part[
+                                :-len(suffix)
+                            ].strip()
+                        )
+
+                        break
+
+                if query_part:
+
+                    result["query"] = query_part
+
+            # ---------------------------------
+            # Pattern:
+            #
+            # watch avicii
+            # ---------------------------------
+
+            elif text.startswith("watch "):
+
+                query_part = text[
+                    len("watch "):
+                ].strip()
+
+                if query_part:
+
+                    result["query"] = query_part
+
+        # ---------------------------------
+        # Browser Search Query
+        # ---------------------------------
+
+        elif result["intent"] == "SEARCH":
+
+            query = None
+
+            # ---------------------------------
             # search youtube for good day
             # ---------------------------------
 
@@ -142,8 +228,6 @@ class NLPProcessor:
                     query = search_part
 
             # ---------------------------------
-            # Pattern:
-            #
             # find cats on youtube
             # ---------------------------------
 
@@ -180,8 +264,6 @@ class NLPProcessor:
                     query = find_part
 
             # ---------------------------------
-            # Pattern:
-            #
             # look for cats on youtube
             # ---------------------------------
 
@@ -269,14 +351,10 @@ class NLPProcessor:
 
                         break
 
-            # ---------------------------------
-            # Default Create Action
-            # ---------------------------------
-
             result["action"] = "create"
 
         # ---------------------------------
-        # Open App Action
+        # Open App
         # ---------------------------------
 
         elif result["intent"] == "OPEN_APP":
@@ -284,7 +362,7 @@ class NLPProcessor:
             result["action"] = "open"
 
         # ---------------------------------
-        # Close App Action
+        # Close App
         # ---------------------------------
 
         elif result["intent"] == "CLOSE_APP":

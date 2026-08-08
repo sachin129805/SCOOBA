@@ -95,8 +95,6 @@ class SkillManager:
 
                     return self.browser.chatgpt()
 
-                # Desktop application fallback
-
                 print(
                     f"🖥 Opening application: "
                     f"{target}"
@@ -143,14 +141,45 @@ class SkillManager:
                         task.query
                     )
 
-                # Default to Google
-
                 print(
                     f"🔎 Google Search: "
                     f"{task.query}"
                 )
 
                 return self.browser.google_search(
+                    task.query
+                )
+
+            # ---------------------------------------------
+            # PLAY FIRST YOUTUBE RESULT
+            # ---------------------------------------------
+
+            elif task.action == "play_first":
+
+                if not task.query:
+
+                    print(
+                        "⚠ play_first requires "
+                        "a query."
+                    )
+
+                    return False
+
+                if target != "youtube":
+
+                    print(
+                        "⚠ play_first currently "
+                        "supports YouTube only."
+                    )
+
+                    return False
+
+                print(
+                    f"▶ Playing first YouTube "
+                    f"result: {task.query}"
+                )
+
+                return self.browser.play_first(
                     task.query
                 )
 
@@ -240,22 +269,6 @@ class SkillManager:
 
     # ==================================================
     # LEGACY DECISION EXECUTION
-    # ==================================================
-    #
-    # Kept temporarily for compatibility.
-    #
-    # The new SCOOBA runtime should use:
-    #
-    # Decision
-    #     ↓
-    # Planner
-    #     ↓
-    # Task[]
-    #     ↓
-    # Executor
-    #     ↓
-    # execute_task()
-    #
     # ==================================================
 
     def execute(self, decision):
