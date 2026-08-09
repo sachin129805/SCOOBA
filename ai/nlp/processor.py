@@ -8,12 +8,97 @@ Author: Sachin
 ==================================================
 """
 
+import re
 import spacy
 
 from ai.intent.classifier import IntentClassifier
 
 
 class NLPProcessor:
+
+    # ==================================================
+    # NUMBER WORDS
+    # ==================================================
+
+    NUMBER_WORDS = {
+
+        "first": 1,
+        "second": 2,
+        "third": 3,
+        "fourth": 4,
+        "fifth": 5,
+        "sixth": 6,
+        "seventh": 7,
+        "eighth": 8,
+        "ninth": 9,
+        "tenth": 10,
+        "eleventh": 11,
+        "twelfth": 12,
+        "thirteenth": 13,
+        "fourteenth": 14,
+        "fifteenth": 15,
+        "sixteenth": 16,
+        "seventeenth": 17,
+        "eighteenth": 18,
+        "nineteenth": 19,
+        "twentieth": 20
+    }
+
+    # ==================================================
+    # VIDEO POSITION PHRASES
+    # ==================================================
+
+    POSITION_PATTERNS = [
+
+        # the fourth video
+        re.compile(
+            r"\bthe\s+"
+            r"(first|second|third|fourth|fifth|sixth|"
+            r"seventh|eighth|ninth|tenth|eleventh|"
+            r"twelfth|thirteenth|fourteenth|fifteenth|"
+            r"sixteenth|seventeenth|eighteenth|"
+            r"nineteenth|twentieth)"
+            r"\s+(?:video|result)\b"
+        ),
+
+        # fourth video
+        re.compile(
+            r"\b"
+            r"(first|second|third|fourth|fifth|sixth|"
+            r"seventh|eighth|ninth|tenth|eleventh|"
+            r"twelfth|thirteenth|fourteenth|fifteenth|"
+            r"sixteenth|seventeenth|eighteenth|"
+            r"nineteenth|twentieth)"
+            r"\s+(?:video|result)\b"
+        ),
+
+        # 4th video / 4th result
+        re.compile(
+            r"\b(\d+)(?:st|nd|rd|th)"
+            r"\s+(?:video|result)\b"
+        ),
+
+        # video number 4
+        re.compile(
+            r"\b(?:video|result)"
+            r"\s+(?:number|no\.?)\s*(\d+)\b"
+        ),
+
+        # number 4
+        re.compile(
+            r"\bnumber\s+(\d+)\b"
+        ),
+
+        # result #4
+        re.compile(
+            r"\b(?:result|video)\s*#\s*(\d+)\b"
+        ),
+
+        # result 4
+        re.compile(
+            r"\b(?:result|video)\s+(\d+)\b"
+        )
+    ]
 
     def __init__(self):
 
@@ -23,6 +108,257 @@ class NLPProcessor:
 
         self.classifier = IntentClassifier()
 
+    # ==================================================
+    # EXTRACT VIDEO POSITION
+    # ==================================================
+
+    def extract_position(self, text):
+
+        # --------------------------------------------------
+        # Word-based positions
+        # --------------------------------------------------
+
+        for pattern in self.POSITION_PATTERNS:
+
+            match = pattern.search(text)
+
+            if not match:
+                continue
+
+            value = match.group(1)
+
+            if value.isdigit():
+
+                return int(value)
+
+            if value in self.NUMBER_WORDS:
+
+                return self.NUMBER_WORDS[value]
+
+        return None
+
+    # ==================================================
+    # REMOVE POSITION PHRASE
+    # ==================================================
+
+    def remove_position_phrase(self, text):
+
+        cleaned = text
+
+        # --------------------------------------------------
+        # Remove phrases such as:
+        #
+        # the fourth video
+        # fourth video
+        # 4th video
+        # fourth result
+        # result number 4
+        # number 4
+        # --------------------------------------------------
+
+        patterns = [
+
+            r"\bthe\s+"
+            r"(?:first|second|third|fourth|fifth|sixth|"
+            r"seventh|eighth|ninth|tenth|eleventh|"
+            r"twelfth|thirteenth|fourteenth|fifteenth|"
+            r"sixteenth|seventeenth|eighteenth|"
+            r"nineteenth|twentieth)"
+            r"\s+(?:video|result)\b",
+
+            r"\b"
+            r"(?:first|second|third|fourth|fifth|sixth|"
+            r"seventh|eighth|ninth|tenth|eleventh|"
+            r"twelfth|thirteenth|fourteenth|fifteenth|"
+            r"sixteenth|seventeenth|eighteenth|"
+            r"nineteenth|twentieth)"
+            r"\s+(?:video|result)\b",
+
+            r"\b\d+(?:st|nd|rd|th)"
+            r"\s+(?:video|result)\b",
+
+            r"\b(?:video|result)"
+            r"\s+(?:number|no\.?)\s*\d+\b",
+
+            r"\bnumber\s+\d+\b",
+
+            r"\b(?:result|video)"
+            r"\s*#\s*\d+\b",
+
+            r"\b(?:result|video)"
+            r"\s+\d+\b"
+        ]
+
+        for pattern in patterns:
+
+            cleaned = re.sub(
+                pattern,
+                "",
+                cleaned,
+                flags=re.IGNORECASE
+            )
+
+        return cleaned.strip()
+
+    # ==================================================
+    # CLEAN QUERY
+    # ==================================================
+
+    def clean_query(self, query):
+
+        if not query:
+
+            return None
+
+        query = query.strip()
+
+        # Remove command leftovers
+        query = re.sub(
+            r"^\s*(?:the\s+)?(?:video|result)\s+(?:of|for)\s+",
+            "",
+            query,
+            flags=re.IGNORECASE
+        )
+
+        query = re.sub(
+            r"^\s*(?:of|for)\s+",
+            "",
+            query,
+            flags=re.IGNORECASE
+        )
+
+        query = query.strip()
+
+        query = query.rstrip(
+            ".,!?;:"
+        ).strip()
+
+        return query or None
+
+    # ==================================================
+    # EXTRACT PLAY QUERY
+    # ==================================================
+
+    def extract_play_query(
+        self,
+        text,
+        position
+    ):
+
+        working = text
+
+        # --------------------------------------------------
+        # Remove position phrase first
+        # --------------------------------------------------
+
+        working = self.remove_position_phrase(
+            working
+        )
+
+        # --------------------------------------------------
+        # Patterns
+        #
+        # play avicii
+        # play the fourth video of avicii
+        # play the fourth video for avicii
+        # avicii and play the fourth video
+        # watch alan walker faded
+        # --------------------------------------------------
+
+        patterns = [
+
+            # ----------------------------------------------
+            # "... and play ..."
+            # ----------------------------------------------
+
+            r"^(.*?)\s+and\s+play\b",
+
+            # ----------------------------------------------
+            # "... and watch ..."
+            # ----------------------------------------------
+
+            r"^(.*?)\s+and\s+watch\b",
+
+            # ----------------------------------------------
+            # "play ..."
+            # ----------------------------------------------
+
+            r"^\s*play\b",
+
+            # ----------------------------------------------
+            # "watch ..."
+            # ----------------------------------------------
+
+            r"^\s*watch\b"
+        ]
+
+        # --------------------------------------------------
+        # Special case:
+        #
+        # "play the fourth video of michael jackson"
+        #
+        # After removing position:
+        #
+        # "play of michael jackson"
+        #
+        # --------------------------------------------------
+
+        if re.match(
+            r"^\s*(?:play|watch)\b",
+            working
+        ):
+
+            working = re.sub(
+                r"^\s*(?:play|watch)\b",
+                "",
+                working,
+                count=1
+            ).strip()
+
+            working = re.sub(
+                r"^\s+(?:the\s+)?(?:video|result)"
+                r"\s+(?:of|for)\s+",
+                "",
+                working,
+                flags=re.IGNORECASE
+            ).strip()
+
+            working = re.sub(
+                r"^\s+(?:of|for)\s+",
+                "",
+                working,
+                flags=re.IGNORECASE
+            ).strip()
+
+            return self.clean_query(
+                working
+            )
+
+        # --------------------------------------------------
+        # "michael jackson and play..."
+        # --------------------------------------------------
+
+        match = re.match(
+            r"^(.*?)\s+and\s+(?:play|watch)\b",
+            working
+        )
+
+        if match:
+
+            query = match.group(1).strip()
+
+            return self.clean_query(
+                query
+            )
+
+        return self.clean_query(
+            working
+        )
+
+    # ==================================================
+    # PROCESS
+    # ==================================================
+
     def process(self, text: str):
 
         text = text.lower().strip()
@@ -30,19 +366,29 @@ class NLPProcessor:
         doc = self.nlp(text)
 
         result = {
+
             "intent": None,
+
             "entity": None,
+
             "query": None,
+
             "target": None,
+
             "action": None,
+
             "location": None,
+
+            "position": None,
+
             "lemmas": [],
+
             "tokens": []
         }
 
-        # ---------------------------------
-        # Extract Tokens & Lemmas
-        # ---------------------------------
+        # ==================================================
+        # TOKENS + LEMMAS
+        # ==================================================
 
         for token in doc:
 
@@ -54,19 +400,22 @@ class NLPProcessor:
                 token.lemma_
             )
 
-        # ---------------------------------
-        # Intent Classification
-        # ---------------------------------
+        # ==================================================
+        # CLASSIFY INTENT
+        # ==================================================
 
-        result["intent"] = self.classifier.classify(
-            result["lemmas"]
+        result["intent"] = (
+            self.classifier.classify(
+                result["lemmas"]
+            )
         )
 
-        # ---------------------------------
-        # Browser Applications
-        # ---------------------------------
+        # ==================================================
+        # BROWSER SITES
+        # ==================================================
 
         browser_sites = [
+
             "youtube",
             "github",
             "gmail",
@@ -79,109 +428,66 @@ class NLPProcessor:
             if site in text:
 
                 result["entity"] = site
+
                 result["target"] = site
 
                 break
 
-        # ---------------------------------
+        # ==================================================
         # PLAY VIDEO
-        # ---------------------------------
+        # ==================================================
 
         if result["intent"] == "PLAY_VIDEO":
 
             result["action"] = "play"
 
-            # ---------------------------------
-            # Determine YouTube
-            # ---------------------------------
+            # --------------------------------------------------
+            # PLAY VIDEO IS CURRENTLY YOUTUBE
+            # --------------------------------------------------
 
             result["entity"] = "youtube"
+
             result["target"] = "youtube"
 
-            # ---------------------------------
-            # Pattern:
-            #
-            # sb737 and play the first video
-            # ---------------------------------
+            # --------------------------------------------------
+            # Position
+            # --------------------------------------------------
 
-            if " and play " in text:
+            result["position"] = (
+                self.extract_position(text)
+            )
 
-                query_part = text.split(
-                    " and play ",
-                    1
-                )[0].strip()
+            # --------------------------------------------------
+            # Query
+            # --------------------------------------------------
 
-                if query_part:
+            result["query"] = (
+                self.extract_play_query(
+                    text,
+                    result["position"]
+                )
+            )
 
-                    result["query"] = query_part
+            # --------------------------------------------------
+            # Default to first result if no
+            # position was specified.
+            # --------------------------------------------------
 
-            # ---------------------------------
-            # Pattern:
-            #
-            # play avicii the nights
-            # ---------------------------------
+            if result["position"] is None:
 
-            elif text.startswith("play "):
+                result["position"] = 1
 
-                query_part = text[
-                    len("play "):
-                ].strip()
-
-                # Remove "the first video"
-                # when explicitly present.
-
-                suffixes = [
-                    " and play the first video",
-                    " play the first video",
-                    " and play first video",
-                    " play first video"
-                ]
-
-                for suffix in suffixes:
-
-                    if query_part.endswith(
-                        suffix
-                    ):
-
-                        query_part = (
-                            query_part[
-                                :-len(suffix)
-                            ].strip()
-                        )
-
-                        break
-
-                if query_part:
-
-                    result["query"] = query_part
-
-            # ---------------------------------
-            # Pattern:
-            #
-            # watch avicii
-            # ---------------------------------
-
-            elif text.startswith("watch "):
-
-                query_part = text[
-                    len("watch "):
-                ].strip()
-
-                if query_part:
-
-                    result["query"] = query_part
-
-        # ---------------------------------
-        # Browser Search Query
-        # ---------------------------------
+        # ==================================================
+        # SEARCH
+        # ==================================================
 
         elif result["intent"] == "SEARCH":
 
             query = None
 
-            # ---------------------------------
+            # --------------------------------------------------
             # search youtube for good day
-            # ---------------------------------
+            # --------------------------------------------------
 
             if "search " in text:
 
@@ -227,9 +533,9 @@ class NLPProcessor:
 
                     query = search_part
 
-            # ---------------------------------
+            # --------------------------------------------------
             # find cats on youtube
-            # ---------------------------------
+            # --------------------------------------------------
 
             elif "find " in text:
 
@@ -255,6 +561,7 @@ class NLPProcessor:
                         )
 
                         result["entity"] = site
+
                         result["target"] = site
 
                         break
@@ -263,9 +570,9 @@ class NLPProcessor:
 
                     query = find_part
 
-            # ---------------------------------
+            # --------------------------------------------------
             # look for cats on youtube
-            # ---------------------------------
+            # --------------------------------------------------
 
             elif "look for " in text:
 
@@ -291,6 +598,7 @@ class NLPProcessor:
                         )
 
                         result["entity"] = site
+
                         result["target"] = site
 
                         break
@@ -298,10 +606,6 @@ class NLPProcessor:
                 if query is None:
 
                     query = look_part
-
-            # ---------------------------------
-            # Clean Query
-            # ---------------------------------
 
             if query:
 
@@ -313,17 +617,19 @@ class NLPProcessor:
 
             result["action"] = "search"
 
-        # ---------------------------------
-        # File / Folder / Project
-        # ---------------------------------
+        # ==================================================
+        # CREATE FILE / FOLDER / PROJECT
+        # ==================================================
 
         if result["intent"] in (
+
             "CREATE_PYTHON_PROJECT",
             "CREATE_FOLDER",
             "CREATE_FILE"
         ):
 
             keywords = [
+
                 "called",
                 "named",
                 "project",
@@ -347,31 +653,32 @@ class NLPProcessor:
                     if entity:
 
                         result["entity"] = entity
+
                         result["target"] = entity
 
                         break
 
             result["action"] = "create"
 
-        # ---------------------------------
-        # Open App
-        # ---------------------------------
+        # ==================================================
+        # OPEN APP
+        # ==================================================
 
         elif result["intent"] == "OPEN_APP":
 
             result["action"] = "open"
 
-        # ---------------------------------
-        # Close App
-        # ---------------------------------
+        # ==================================================
+        # CLOSE APP
+        # ==================================================
 
         elif result["intent"] == "CLOSE_APP":
 
             result["action"] = "close"
 
-        # ---------------------------------
-        # Debug
-        # ---------------------------------
+        # ==================================================
+        # DEBUG
+        # ==================================================
 
         print(
             "\n========== NLP DEBUG =========="
@@ -388,28 +695,33 @@ class NLPProcessor:
         print("--------------------------------")
 
         print(
-            "Intent :",
+            "Intent   :",
             result["intent"]
         )
 
         print(
-            "Entity :",
+            "Entity   :",
             result["entity"]
         )
 
         print(
-            "Query  :",
+            "Query    :",
             result["query"]
         )
 
         print(
-            "Target :",
+            "Target   :",
             result["target"]
         )
 
         print(
-            "Action :",
+            "Action   :",
             result["action"]
+        )
+
+        print(
+            "Position :",
+            result["position"]
         )
 
         print(

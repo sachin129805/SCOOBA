@@ -47,9 +47,9 @@ class SkillManager:
                 or "google"
             ).lower().strip()
 
-            # ---------------------------------------------
+            # ------------------------------------------
             # OPEN
-            # ---------------------------------------------
+            # ------------------------------------------
 
             if task.action == "open":
 
@@ -95,18 +95,13 @@ class SkillManager:
 
                     return self.browser.chatgpt()
 
-                print(
-                    f"🖥 Opening application: "
-                    f"{target}"
-                )
-
                 return self.desktop.open(
                     target
                 )
 
-            # ---------------------------------------------
+            # ------------------------------------------
             # SEARCH
-            # ---------------------------------------------
+            # ------------------------------------------
 
             elif task.action == "search":
 
@@ -150,9 +145,9 @@ class SkillManager:
                     task.query
                 )
 
-            # ---------------------------------------------
-            # PLAY FIRST YOUTUBE RESULT
-            # ---------------------------------------------
+            # ------------------------------------------
+            # PLAY FIRST
+            # ------------------------------------------
 
             elif task.action == "play_first":
 
@@ -183,9 +178,49 @@ class SkillManager:
                     task.query
                 )
 
-            # ---------------------------------------------
-            # UNKNOWN BROWSER ACTION
-            # ---------------------------------------------
+            # ------------------------------------------
+            # PLAY SPECIFIC RESULT
+            # ------------------------------------------
+
+            elif task.action == "play_video":
+
+                if not task.query:
+
+                    print(
+                        "⚠ play_video requires "
+                        "a query."
+                    )
+
+                    return False
+
+                if not task.position:
+
+                    print(
+                        "⚠ play_video requires "
+                        "a result position."
+                    )
+
+                    return False
+
+                if target != "youtube":
+
+                    print(
+                        "⚠ play_video currently "
+                        "supports YouTube only."
+                    )
+
+                    return False
+
+                print(
+                    f"▶ Playing YouTube "
+                    f"result #{task.position}: "
+                    f"{task.query}"
+                )
+
+                return self.browser.play_video(
+                    task.query,
+                    task.position
+                )
 
             print(
                 f"⚠ Unknown browser action: "
@@ -200,17 +235,9 @@ class SkillManager:
 
         if task.skill == "filesystem":
 
-            # ---------------------------------------------
-            # CREATE FOLDER
-            # ---------------------------------------------
-
             if task.action == "create_folder":
 
                 if not task.entity:
-
-                    print(
-                        "⚠ Folder name missing."
-                    )
 
                     return False
 
@@ -218,17 +245,9 @@ class SkillManager:
                     task.entity
                 )
 
-            # ---------------------------------------------
-            # CREATE FILE
-            # ---------------------------------------------
-
             elif task.action == "create_file":
 
                 if not task.entity:
-
-                    print(
-                        "⚠ File name missing."
-                    )
 
                     return False
 
@@ -257,7 +276,7 @@ class SkillManager:
             return False
 
         # ==================================================
-        # UNKNOWN SKILL
+        # UNKNOWN
         # ==================================================
 
         print(
@@ -274,7 +293,7 @@ class SkillManager:
     def execute(self, decision):
 
         print(
-            "\n========== LEGACY DECISION =========="
+            "\n========== DECISION =========="
         )
 
         print(
@@ -303,31 +322,26 @@ class SkillManager:
         )
 
         print(
+            f"Position    : "
+            f"{decision.position}"
+        )
+
+        print(
             f"Confidence  : "
             f"{decision.confidence}"
         )
 
         print(
-            "=====================================\n"
+            "==============================\n"
         )
 
-        if decision.intent is None:
-
-            return False
-
-        # ---------------------------------------------
+        # ------------------------------------------
         # SEARCH
-        # ---------------------------------------------
+        # ------------------------------------------
 
         if decision.intent == "SEARCH":
 
-            query = decision.query
-
-            if not query:
-
-                print(
-                    "⚠ No search query detected."
-                )
+            if not decision.query:
 
                 return False
 
@@ -341,41 +355,43 @@ class SkillManager:
 
             if target == "youtube":
 
-                print(
-                    f"🔎 YouTube Search: "
-                    f"{query}"
-                )
-
                 return self.browser.youtube_search(
-                    query
-                )
-
-            elif target == "google":
-
-                print(
-                    f"🔎 Google Search: "
-                    f"{query}"
-                )
-
-                return self.browser.google_search(
-                    query
+                    decision.query
                 )
 
             return self.browser.google_search(
-                query
+                decision.query
             )
 
-        # ---------------------------------------------
+        # ------------------------------------------
+        # PLAY VIDEO
+        # ------------------------------------------
+
+        if decision.intent == "PLAY_VIDEO":
+
+            query = decision.query
+
+            position = (
+                decision.position
+                or 1
+            )
+
+            if not query:
+
+                return False
+
+            return self.browser.play_video(
+                query,
+                position
+            )
+
+        # ------------------------------------------
         # OPEN APP
-        # ---------------------------------------------
+        # ------------------------------------------
 
         if decision.intent == "OPEN_APP":
 
-            if decision.entity is None:
-
-                print(
-                    "⚠ No application detected."
-                )
+            if not decision.entity:
 
                 return False
 
@@ -411,9 +427,9 @@ class SkillManager:
                 entity
             )
 
-        # ---------------------------------------------
+        # ------------------------------------------
         # CREATE FOLDER
-        # ---------------------------------------------
+        # ------------------------------------------
 
         elif decision.intent == "CREATE_FOLDER":
 
@@ -430,9 +446,9 @@ class SkillManager:
                 folder_name
             )
 
-        # ---------------------------------------------
+        # ------------------------------------------
         # CREATE FILE
-        # ---------------------------------------------
+        # ------------------------------------------
 
         elif decision.intent == "CREATE_FILE":
 
@@ -449,12 +465,13 @@ class SkillManager:
                 file_name
             )
 
-        # ---------------------------------------------
+        # ------------------------------------------
         # CREATE PYTHON PROJECT
-        # ---------------------------------------------
+        # ------------------------------------------
 
-        elif decision.intent == (
-            "CREATE_PYTHON_PROJECT"
+        elif (
+            decision.intent
+            == "CREATE_PYTHON_PROJECT"
         ):
 
             project_name = (
@@ -473,9 +490,9 @@ class SkillManager:
 
             return True
 
-        # ---------------------------------------------
-        # CLOSE APP
-        # ---------------------------------------------
+        # ------------------------------------------
+        # CLOSE
+        # ------------------------------------------
 
         elif decision.intent == "CLOSE_APP":
 

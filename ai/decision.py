@@ -2,58 +2,90 @@
 ==================================================
 SCOOBA
 
-Decision Object
+AI Decision
 
 Author: Sachin
 ==================================================
 """
 
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Optional, List
 
 
 @dataclass
 class Decision:
 
-    # Main intent
+    # ==================================================
+    # CORE
+    # ==================================================
+
     intent: Optional[str] = None
 
-    # Main entity
-    # Examples:
-    # youtube
-    # github
-    # hello.py
     entity: Optional[str] = None
 
-    # Optional action
     action: Optional[str] = None
 
-    # Search query
-    # Examples:
-    # good day
-    # python tutorial
+    # ==================================================
+    # QUERY
+    # ==================================================
+
     query: Optional[str] = None
 
-    # Target object
-    # Examples:
-    # hello.py
-    # MyProject
-    # AI Projects
+    # ==================================================
+    # TARGET
+    # ==================================================
+
     target: Optional[str] = None
 
-    # Optional location/path
+    # ==================================================
+    # LOCATION
+    # ==================================================
+
     location: Optional[str] = None
 
-    # Original user command
-    #
-    # This is important for multi-step commands.
-    #
-    # Example:
-    # "open youtube and search avicii"
+    # ==================================================
+    # VIDEO POSITION
+    # ==================================================
+
+    position: Optional[int] = None
+
+    # ==================================================
+    # ORIGINAL COMMAND
+    # ==================================================
+
     command: Optional[str] = None
 
-    # AI confidence
+    # ==================================================
+    # CONFIDENCE
+    # ==================================================
+
     confidence: float = 0.0
 
-    # Assistant response
+    # ==================================================
+    # RESPONSE
+    # ==================================================
+
     response: Optional[str] = None
+
+    # ==================================================
+    # MULTI-STEP DECISIONS
+    # ==================================================
+    #
+    # Example:
+    #
+    # "open youtube and search avicii and play
+    #  the third video"
+    #
+    # becomes:
+    #
+    # steps = [
+    #     OPEN_APP,
+    #     SEARCH,
+    #     PLAY_VIDEO
+    # ]
+    #
+    # ==================================================
+
+    steps: List["Decision"] = field(
+        default_factory=list
+    )

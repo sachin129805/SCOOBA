@@ -2,7 +2,7 @@
 ==================================================
 SCOOBA
 
-Intent Classifier 5.0
+Intent Classifier
 
 Author: Sachin
 ==================================================
@@ -10,6 +10,10 @@ Author: Sachin
 
 
 class IntentClassifier:
+
+    # ==================================================
+    # VERBS
+    # ==================================================
 
     VERBS = {
 
@@ -48,6 +52,10 @@ class IntentClassifier:
         }
     }
 
+    # ==================================================
+    # OBJECTS
+    # ==================================================
+
     OBJECTS = {
 
         "CREATE_FOLDER": {
@@ -69,65 +77,82 @@ class IntentClassifier:
         }
     }
 
+    # ==================================================
+    # CLASSIFY
+    # ==================================================
+
     def classify(self, lemmas):
 
         words = set(lemmas)
 
-        # -----------------------------
-        # Search
-        # -----------------------------
-
-        if words & self.VERBS["SEARCH"]:
-
-            return "SEARCH"
-
-        # -----------------------------
-        # Play Video
-        # -----------------------------
+        # ==================================================
+        # PLAY VIDEO
+        # ==================================================
 
         if words & self.VERBS["PLAY_VIDEO"]:
 
             return "PLAY_VIDEO"
 
-        # -----------------------------
-        # Open App
-        # -----------------------------
+        # ==================================================
+        # SEARCH
+        # ==================================================
+
+        if words & self.VERBS["SEARCH"]:
+
+            return "SEARCH"
+
+        # ==================================================
+        # OPEN APP
+        # ==================================================
 
         if words & self.VERBS["OPEN_APP"]:
 
             return "OPEN_APP"
 
-        # -----------------------------
-        # Close App
-        # -----------------------------
+        # ==================================================
+        # CLOSE APP
+        # ==================================================
 
         if words & self.VERBS["CLOSE_APP"]:
 
             return "CLOSE_APP"
 
-        # -----------------------------
-        # Greeting
-        # -----------------------------
+        # ==================================================
+        # GREETING
+        # ==================================================
 
-        if {"hi", "hello", "hey"} & words:
+        if {
+            "hi",
+            "hello",
+            "hey"
+        } & words:
 
             return "GREETING"
 
-        # -----------------------------
-        # Create
-        # -----------------------------
+        # ==================================================
+        # CREATE
+        # ==================================================
 
         if words & self.VERBS["CREATE"]:
 
-            if words & self.OBJECTS["CREATE_FOLDER"]:
+            if (
+                words
+                & self.OBJECTS["CREATE_FOLDER"]
+            ):
 
                 return "CREATE_FOLDER"
 
-            if words & self.OBJECTS["CREATE_FILE"]:
+            if (
+                words
+                & self.OBJECTS["CREATE_FILE"]
+            ):
 
                 return "CREATE_FILE"
 
-            if words & self.OBJECTS["CREATE_PYTHON_PROJECT"]:
+            if (
+                words
+                & self.OBJECTS["CREATE_PYTHON_PROJECT"]
+            ):
 
                 return "CREATE_PYTHON_PROJECT"
 

@@ -1,10 +1,25 @@
+"""
+==================================================
+SCOOBA
+
+PLAY VIDEO TEST
+
+Author: Sachin
+==================================================
+"""
+
 from ai.engine import AIEngine
 from planner.planner import Planner
 from planner.executor import Executor
 from skills.manager import SkillManager
 
 
+# ==================================================
+# INITIALIZE
+# ==================================================
+
 ai = AIEngine()
+
 planner = Planner()
 
 skills = SkillManager()
@@ -14,57 +29,82 @@ executor = Executor(
 )
 
 
-command = "SB737 and play the first video"
+# ==================================================
+# TEST COMMAND
+# ==================================================
+
+commands = [
+
+    "Michael Jackson and play the seventh video",
+
+]
 
 
-print("\n" + "=" * 60)
-print("COMMAND:", command)
-print("=" * 60)
+# ==================================================
+# RUN TESTS
+# ==================================================
 
+for command in commands:
 
-# ==========================================
-# AI
-# ==========================================
+    print(
+        "\n"
+        + "=" * 60
+    )
 
-decision = ai.think(
-    command
-)
+    print(
+        "COMMAND:",
+        command
+    )
 
-print("\nDECISION:")
-print(decision)
+    print(
+        "=" * 60
+    )
 
+    # ----------------------------------------------
+    # AI
+    # ----------------------------------------------
 
-# ==========================================
-# PLANNER
-# ==========================================
+    decision = ai.think(
+        command
+    )
 
-tasks = planner.create_plan(
-    decision
-)
+    print(
+        "\nDECISION:"
+    )
 
-print(
-    "\nTASK COUNT:",
-    len(tasks)
-)
+    print(
+        decision
+    )
 
+    # ----------------------------------------------
+    # PLAN
+    # ----------------------------------------------
 
-# ==========================================
-# EXECUTOR
-# ==========================================
+    tasks = planner.create_plan(
+        decision
+    )
 
-success = executor.execute(
-    tasks
-)
+    print(
+        f"TASK COUNT: "
+        f"{len(tasks)}"
+    )
 
+    # ----------------------------------------------
+    # EXECUTION
+    # ----------------------------------------------
 
-# ==========================================
-# RESULT
-# ==========================================
+    success = executor.execute(
+        tasks
+    )
 
-print(
-    "\nFinal Result:",
-    "SUCCESS"
-    if success
-    else
-    "FAILED"
-)
+    # ----------------------------------------------
+    # RESULT
+    # ----------------------------------------------
+
+    print(
+        "\nFinal Result:",
+        "SUCCESS"
+        if success
+        else
+        "FAILED"
+    )

@@ -15,43 +15,38 @@ from typing import Optional
 @dataclass
 class Task:
 
-    # Skill responsible for execution
-    #
-    # Examples:
-    # browser
-    # filesystem
-    # developer
+    # ==================================================
+    # SKILL
+    # ==================================================
 
     skill: str
 
-    # Action to perform
-    #
-    # Examples:
-    # open
-    # search
-    # play_first
-    # create_file
+    # ==================================================
+    # ACTION
+    # ==================================================
 
     action: str
 
-    # Main entity
-    #
-    # Examples:
-    # youtube
-    # google
-    # hello.py
+    # ==================================================
+    # ENTITY
+    # ==================================================
 
     entity: Optional[str] = None
 
-    # Optional search/query data
-    #
-    # Examples:
-    # Avicii
-    # SB737
-    # Python tutorials
+    # ==================================================
+    # QUERY
+    # ==================================================
 
     query: Optional[str] = None
 
-    # Optional target
+    # ==================================================
+    # TARGET
+    # ==================================================
 
     target: Optional[str] = None
+
+    # ==================================================
+    # VIDEO POSITION
+    # ==================================================
+
+    position: Optional[int] = None

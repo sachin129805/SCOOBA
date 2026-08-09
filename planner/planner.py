@@ -13,138 +13,336 @@ from planner.task import Task
 
 class Planner:
 
+    # ==================================================
+    # CREATE PLAN
+    # ==================================================
+
     def create_plan(self, decision):
+
+        # ==================================================
+        # MULTI-STEP COMMAND
+        # ==================================================
+
+        if (
+            getattr(
+                decision,
+                "steps",
+                None
+            )
+            and
+            len(decision.steps) > 1
+        ):
+
+            return self.create_multi_step_plan(
+                decision
+            )
+
+        # ==================================================
+        # SINGLE COMMAND
+        # ==================================================
+
+        return self.create_single_plan(
+            decision
+        )
+
+    # ==================================================
+    # MULTI-STEP PLAN
+    # ==================================================
+
+    def create_multi_step_plan(
+        self,
+        decision
+    ):
 
         tasks = []
 
-        command = (
-            decision.command
-            or ""
-        ).lower().strip()
+        # --------------------------------------------------
+        # Context
+        #
+        # Used when a later command omits information.
+        #
+        # Example:
+        #
+        # search for avicii
+        # and play the third video
+        #
+        # The second step inherits:
+        #
+        # query = avicii
+        #
+        # --------------------------------------------------
 
-        # ---------------------------------
-        # PLAY VIDEO
-        # ---------------------------------
+        current_target = None
 
-        if decision.intent == "PLAY_VIDEO":
+        current_query = None
 
-            query = decision.query
+        for step in decision.steps:
 
-            if query:
+            # ==================================================
+            # OPEN APP
+            # ==================================================
 
-                tasks.append(
-                    Task(
-                        skill="browser",
-                        action="play_first",
-                        entity=(
-                            decision.target
-                            or "youtube"
-                        ),
-                        query=query
-                    )
+            if step.intent == "OPEN_APP":
+
+                target = (
+                    step.entity
+                    or step.target
                 )
 
-        # ---------------------------------
-        # MULTI-STEP BROWSER SEARCH
-        # ---------------------------------
+                if target:
 
-        elif (
-            decision.intent == "SEARCH"
-        ):
-
-            compound_markers = [
-                " and search for ",
-                " and search ",
-                " and find ",
-                " and look for "
-            ]
-
-            compound_marker = None
-
-            for marker in compound_markers:
-
-                if marker in command:
-
-                    compound_marker = marker
-
-                    break
-
-            if (
-                compound_marker
-                and decision.entity
-                and decision.query
-            ):
-
-                opening_part = command.split(
-                    compound_marker,
-                    1
-                )[0].strip()
-
-                opening_part = (
-                    opening_part
-                    .replace(
-                        "open ",
-                        "",
-                        1
+                    current_target = (
+                        target
                     )
-                    .replace(
-                        "launch ",
-                        "",
-                        1
-                    )
-                    .replace(
-                        "start ",
-                        "",
-                        1
-                    )
-                    .replace(
-                        "run ",
-                        "",
-                        1
-                    )
-                    .strip()
-                )
 
                 tasks.append(
                     Task(
                         skill="browser",
                         action="open",
-                        entity=opening_part
+                        entity=target
                     )
                 )
 
-                tasks.append(
-                    Task(
-                        skill="browser",
-                        action="search",
-                        entity=(
-                            decision.target
-                            or decision.entity
-                        ),
-                        query=decision.query
-                    )
-                )
+            # ==================================================
+            # SEARCH
+            # ==================================================
 
-            else:
+            elif step.intent == "SEARCH":
 
                 target = (
-                    decision.target
-                    or decision.entity
+                    step.target
+                    or step.entity
+                    or current_target
                     or "google"
                 )
+
+                query = (
+                    step.query
+                    or current_query
+                )
+
+                if query:
+
+                    current_query = (
+                        query
+                    )
+
+                if target:
+
+                    current_target = (
+                        target
+                    )
 
                 tasks.append(
                     Task(
                         skill="browser",
                         action="search",
                         entity=target,
-                        query=decision.query
+                        query=query
                     )
                 )
 
-        # ---------------------------------
+            # ==================================================
+            # PLAY VIDEO
+            # ==================================================
+
+            elif step.intent == "PLAY_VIDEO":
+
+                target = (
+                    step.target
+                    or step.entity
+                    or current_target
+                    or "youtube"
+                )
+
+                query = (
+                    step.query
+                    or current_query
+                )
+
+                position = (
+                    step.position
+                    or 1
+                )
+
+                # --------------------------------------------------
+                # Play first
+                # --------------------------------------------------
+
+                if position == 1:
+
+                    action = "play_first"
+
+                else:
+
+                    action = "play_video"
+
+                tasks.append(
+                    Task(
+                        skill="browser",
+                        action=action,
+                        entity=target,
+                        query=query,
+                        position=position
+                    )
+                )
+
+            # ==================================================
+            # CREATE FOLDER
+            # ==================================================
+
+            elif step.intent == "CREATE_FOLDER":
+
+                tasks.append(
+                    Task(
+                        skill="filesystem",
+                        action="create_folder",
+                        entity=(
+                            step.entity
+                            or step.target
+                        )
+                    )
+                )
+
+            # ==================================================
+            # CREATE FILE
+            # ==================================================
+
+            elif step.intent == "CREATE_FILE":
+
+                tasks.append(
+                    Task(
+                        skill="filesystem",
+                        action="create_file",
+                        entity=(
+                            step.entity
+                            or step.target
+                        )
+                    )
+                )
+
+            # ==================================================
+            # CREATE PYTHON PROJECT
+            # ==================================================
+
+            elif (
+                step.intent
+                == "CREATE_PYTHON_PROJECT"
+            ):
+
+                project_name = (
+                    step.target
+                    or step.entity
+                )
+
+                tasks.extend([
+
+                    Task(
+                        skill="developer",
+                        action="create_project",
+                        entity=project_name
+                    ),
+
+                    Task(
+                        skill="developer",
+                        action="create_venv",
+                        entity=project_name
+                    ),
+
+                    Task(
+                        skill="developer",
+                        action="open_cursor",
+                        entity=project_name
+                    )
+
+                ])
+
+        self.print_plan(
+            tasks
+        )
+
+        return tasks
+
+    # ==================================================
+    # SINGLE PLAN
+    # ==================================================
+
+    def create_single_plan(
+        self,
+        decision
+    ):
+
+        tasks = []
+
+        # ==================================================
+        # PLAY VIDEO
+        # ==================================================
+
+        if decision.intent == "PLAY_VIDEO":
+
+            query = decision.query
+
+            position = (
+                decision.position
+                or 1
+            )
+
+            target = (
+                decision.target
+                or decision.entity
+                or "youtube"
+            )
+
+            if query:
+
+                if position == 1:
+
+                    tasks.append(
+                        Task(
+                            skill="browser",
+                            action="play_first",
+                            entity=target,
+                            query=query,
+                            position=1
+                        )
+                    )
+
+                else:
+
+                    tasks.append(
+                        Task(
+                            skill="browser",
+                            action="play_video",
+                            entity=target,
+                            query=query,
+                            position=position
+                        )
+                    )
+
+        # ==================================================
+        # SEARCH
+        # ==================================================
+
+        elif decision.intent == "SEARCH":
+
+            target = (
+                decision.target
+                or decision.entity
+                or "google"
+            )
+
+            tasks.append(
+                Task(
+                    skill="browser",
+                    action="search",
+                    entity=target,
+                    query=decision.query
+                )
+            )
+
+        # ==================================================
         # OPEN APP
-        # ---------------------------------
+        # ==================================================
 
         elif decision.intent == "OPEN_APP":
 
@@ -156,9 +354,9 @@ class Planner:
                 )
             )
 
-        # ---------------------------------
+        # ==================================================
         # CREATE FOLDER
-        # ---------------------------------
+        # ==================================================
 
         elif decision.intent == "CREATE_FOLDER":
 
@@ -170,9 +368,9 @@ class Planner:
                 )
             )
 
-        # ---------------------------------
+        # ==================================================
         # CREATE FILE
-        # ---------------------------------
+        # ==================================================
 
         elif decision.intent == "CREATE_FILE":
 
@@ -184,9 +382,9 @@ class Planner:
                 )
             )
 
-        # ---------------------------------
+        # ==================================================
         # CREATE PYTHON PROJECT
-        # ---------------------------------
+        # ==================================================
 
         elif (
             decision.intent
@@ -220,9 +418,24 @@ class Planner:
 
             ])
 
-        # ---------------------------------
-        # DEBUG PLAN
-        # ---------------------------------
+        # ==================================================
+        # DEBUG
+        # ==================================================
+
+        self.print_plan(
+            tasks
+        )
+
+        return tasks
+
+    # ==================================================
+    # PRINT PLAN
+    # ==================================================
+
+    def print_plan(
+        self,
+        tasks
+    ):
 
         print(
             "\n========== PLAN =========="
@@ -255,8 +468,17 @@ class Planner:
                         f"{task.query}"
                     )
 
+                if getattr(
+                    task,
+                    "position",
+                    None
+                ):
+
+                    print(
+                        f"   Position: "
+                        f"{task.position}"
+                    )
+
         print(
             "==========================\n"
         )
-
-        return tasks
