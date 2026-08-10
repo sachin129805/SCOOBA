@@ -17,17 +17,51 @@ class AIDispatcher:
 
         self.personality = PersonalityEngine()
 
-    def response(self, decision):
+    # ==================================================
+    # RESPONSE
+    # ==================================================
 
-        if decision.intent == "GREETING":
+    def response(
+        self,
+        decision,
+        success=None
+    ):
 
-            return self.personality.speak("GREETING")
+        intent = getattr(
+            decision,
+            "intent",
+            None
+        )
 
-        elif decision.intent == "OPEN_APP":
+        entity = getattr(
+            decision,
+            "entity",
+            None
+        )
 
-            return self.personality.speak(
-                "OPEN_APP",
-                decision.entity
-            )
+        query = getattr(
+            decision,
+            "query",
+            None
+        )
 
-        return self.personality.speak("UNKNOWN")
+        position = getattr(
+            decision,
+            "position",
+            None
+        )
+
+        response = self.personality.speak(
+            intent=intent,
+            entity=entity,
+            query=query,
+            position=position,
+            success=success
+        )
+
+        self.personality.remember(
+            decision,
+            success
+        )
+
+        return response

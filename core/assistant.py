@@ -372,7 +372,8 @@ class SCOOBA:
 
                 response = (
                     self.dispatcher.response(
-                        decision
+                        decision,
+                        success
                     )
                 )
 
