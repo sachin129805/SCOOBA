@@ -25,39 +25,70 @@ class BrowserSkill:
     def __init__(self):
 
         self.playwright = None
-
         self.browser = None
-
+        self.context = None
         self.page = None
 
     # ==================================================
-    # BROWSER SESSION
+    # ENSURE BROWSER
     # ==================================================
 
     def _ensure_browser(self):
 
         # --------------------------------------------------
-        # Browser already running
+        # Existing browser
         # --------------------------------------------------
 
         if (
             self.browser
             and self.browser.is_connected()
-            and self.page
-            and not self.page.is_closed()
+            and self.context
+            and not self.context.is_closed()
         ):
 
-            return True
+            # Existing page still alive
+            if (
+                self.page
+                and not self.page.is_closed()
+            ):
+
+                return True
+
+            # Page was closed, create another one
+            try:
+
+                self.page = (
+                    self.context.new_page()
+                )
+
+                return True
+
+            except Exception:
+                pass
+
+        # ==================================================
+        # START PLAYWRIGHT
+        # ==================================================
 
         try:
 
             print(
-                "🌐 Starting Chrome..."
+                "🚀 Starting Chrome..."
             )
+
+            # IMPORTANT:
+            #
+            # Keep the Playwright object alive
+            # on self.
+            #
 
             self.playwright = (
                 sync_playwright().start()
             )
+
+            # ==================================================
+            # LAUNCH CHROME
+            # ==================================================
 
             self.browser = (
                 self.playwright.chromium.launch(
@@ -66,8 +97,16 @@ class BrowserSkill:
                 )
             )
 
-            self.page = (
-                self.browser.new_page(
+            print(
+                "✅ Chrome launched."
+            )
+
+            # ==================================================
+            # CREATE CONTEXT
+            # ==================================================
+
+            self.context = (
+                self.browser.new_context(
                     viewport={
                         "width": 1280,
                         "height": 900
@@ -75,8 +114,16 @@ class BrowserSkill:
                 )
             )
 
+            # ==================================================
+            # CREATE PAGE
+            # ==================================================
+
+            self.page = (
+                self.context.new_page()
+            )
+
             print(
-                "✅ Chrome ready."
+                "✅ Browser context ready."
             )
 
             return True
@@ -84,68 +131,85 @@ class BrowserSkill:
         except Exception as e:
 
             print(
-                f"❌ Could not start Chrome: {e}"
+                "❌ Failed to start browser:"
             )
 
-            self.playwright = None
+            print(
+                f"   {e}"
+            )
 
-            self.browser = None
-
-            self.page = None
+            self._cleanup_browser()
 
             return False
 
     # ==================================================
-    # CLOSE BROWSER
+    # CHECK PAGE
     # ==================================================
 
-    def close(self):
+    def _ensure_page(self):
+
+        if not self._ensure_browser():
+
+            return False
+
+        # --------------------------------------------------
+        # Page exists and is alive
+        # --------------------------------------------------
+
+        if (
+            self.page
+            and not self.page.is_closed()
+        ):
+
+            return True
+
+        # --------------------------------------------------
+        # Recreate page
+        # --------------------------------------------------
 
         try:
 
-            if self.browser:
+            self.page = (
+                self.context.new_page()
+            )
 
-                self.browser.close()
+            return True
 
-        except Exception:
-            pass
+        except Exception as e:
 
-        try:
+            print(
+                f"❌ Could not create page: {e}"
+            )
 
-            if self.playwright:
-
-                self.playwright.stop()
-
-        except Exception:
-            pass
-
-        self.browser = None
-
-        self.page = None
-
-        self.playwright = None
-
-        print(
-            "🌐 Browser closed."
-        )
-
-        return True
+            return False
 
     # ==================================================
-    # BASIC BROWSER
+    # OPEN URL
     # ==================================================
 
     def open_url(self, url):
 
         if not url:
 
-            return False
-
-        if not self._ensure_browser():
+            print(
+                "⚠ No URL provided."
+            )
 
             return False
 
         try:
+
+            if not self._ensure_page():
+
+                return False
+
+            print(
+                f"🌐 Opening: {url}"
+            )
+
+            # ==================================================
+            # NAVIGATE
+            # ==================================================
 
             self.page.goto(
                 url,
@@ -154,31 +218,55 @@ class BrowserSkill:
             )
 
             print(
-                f"🌐 Opened: {url}"
+                f"✅ Opened: {url}"
             )
+
+            # ==================================================
+            # IMPORTANT
+            # ==================================================
+            #
+            # NO input()
+            # NO browser.close()
+            #
+            # SCOOBA continues immediately.
+            #
 
             return True
 
         except PlaywrightTimeoutError:
 
             print(
-                "⚠ Page loading timed out, "
-                "but the browser may still "
-                "have opened the page."
+                "⚠ Page load timed out."
             )
+
+            # The page may still have loaded.
 
             return True
 
         except Exception as e:
 
             print(
-                f"❌ Browser error: {e}"
+                "❌ Browser error:"
+            )
+
+            print(
+                f"   {e}"
             )
 
             return False
 
     # ==================================================
-    # WEBSITES
+    # GOOGLE
+    # ==================================================
+
+    def google(self):
+
+        return self.open_url(
+            "https://www.google.com"
+        )
+
+    # ==================================================
+    # YOUTUBE
     # ==================================================
 
     def youtube(self):
@@ -187,17 +275,29 @@ class BrowserSkill:
             "https://www.youtube.com"
         )
 
+    # ==================================================
+    # GITHUB
+    # ==================================================
+
     def github(self):
 
         return self.open_url(
             "https://github.com"
         )
 
+    # ==================================================
+    # GMAIL
+    # ==================================================
+
     def gmail(self):
 
         return self.open_url(
             "https://mail.google.com"
         )
+
+    # ==================================================
+    # CHATGPT
+    # ==================================================
 
     def chatgpt(self):
 
@@ -230,7 +330,7 @@ class BrowserSkill:
         )
 
         print(
-            f"🔎 Google Search: {query}"
+            f"🔎 Searching Google: {query}"
         )
 
         return self.open_url(
@@ -262,7 +362,7 @@ class BrowserSkill:
         )
 
         print(
-            f"🔎 YouTube Search: {query}"
+            f"🔎 Searching YouTube: {query}"
         )
 
         return self.open_url(
@@ -275,18 +375,13 @@ class BrowserSkill:
 
     def play_first(self, query):
 
-        print(
-            f"▶ Playing first YouTube result: "
-            f"{query}"
-        )
-
         return self.play_video(
             query,
             1
         )
 
     # ==================================================
-    # PLAY SPECIFIC RESULT
+    # PLAY SPECIFIC VIDEO
     # ==================================================
 
     def play_video(
@@ -315,14 +410,6 @@ class BrowserSkill:
 
             return False
 
-        # ==================================================
-        # START / REUSE BROWSER
-        # ==================================================
-
-        if not self._ensure_browser():
-
-            return False
-
         encoded_query = urllib.parse.quote(
             query
         )
@@ -343,6 +430,16 @@ class BrowserSkill:
         try:
 
             # ==================================================
+            # ENSURE PAGE
+            # ==================================================
+
+            if not self._ensure_page():
+
+                return False
+
+            page = self.page
+
+            # ==================================================
             # OPEN SEARCH
             # ==================================================
 
@@ -350,46 +447,42 @@ class BrowserSkill:
                 "🌐 Opening YouTube search..."
             )
 
-            self.page.goto(
+            page.goto(
                 search_url,
                 wait_until="domcontentloaded",
                 timeout=30000
             )
 
             # ==================================================
-            # WAIT FOR INITIAL RESULTS
+            # WAIT
             # ==================================================
 
             print(
                 "🔎 Waiting for YouTube results..."
             )
 
-            results = self.page.locator(
+            page.wait_for_timeout(
+                2000
+            )
+
+            # ==================================================
+            # RESULTS
+            # ==================================================
+
+            results = page.locator(
                 "a#video-title"
             )
 
-            try:
-
-                results.first.wait_for(
-                    state="visible",
-                    timeout=10000
-                )
-
-            except PlaywrightTimeoutError:
-
-                print(
-                    "⚠ Initial results "
-                    "did not appear immediately."
-                )
-
             # ==================================================
-            # LOAD ENOUGH RESULTS
+            # LOAD MORE
             # ==================================================
 
             max_scrolls = max(
                 5,
                 position
             )
+
+            previous_count = -1
 
             for scroll_number in range(
                 max_scrolls
@@ -401,10 +494,6 @@ class BrowserSkill:
                     f"   Results currently loaded: "
                     f"{count}"
                 )
-
-                # ------------------------------------------
-                # Enough results
-                # ------------------------------------------
 
                 if count >= position:
 
@@ -420,17 +509,29 @@ class BrowserSkill:
                     f"{max_scrolls})"
                 )
 
-                self.page.mouse.wheel(
+                page.mouse.wheel(
                     0,
                     1400
                 )
 
-                self.page.wait_for_timeout(
+                page.wait_for_timeout(
                     1500
                 )
 
+                # ------------------------------------------
+                # Stop excessive scrolling
+                # ------------------------------------------
+
+                if count == previous_count:
+
+                    page.wait_for_timeout(
+                        1000
+                    )
+
+                previous_count = count
+
             # ==================================================
-            # FINAL RESULT COUNT
+            # FINAL COUNT
             # ==================================================
 
             count = results.count()
@@ -438,10 +539,6 @@ class BrowserSkill:
             print(
                 f"🎬 Results detected: {count}"
             )
-
-            # ==================================================
-            # RESULT NOT FOUND
-            # ==================================================
 
             if count < position:
 
@@ -454,51 +551,38 @@ class BrowserSkill:
                 return False
 
             # ==================================================
-            # SELECT RESULT
+            # SELECT
             # ==================================================
 
             selected = results.nth(
                 position - 1
             )
 
-            # ==================================================
-            # SCROLL TO RESULT
-            # ==================================================
+            selected.scroll_into_view_if_needed()
 
-            try:
-
-                selected.scroll_into_view_if_needed()
-
-            except Exception:
-
-                pass
-
-            self.page.wait_for_timeout(
+            page.wait_for_timeout(
                 500
             )
 
             # ==================================================
-            # GET TITLE
+            # TITLE
             # ==================================================
 
-            title = (
-                selected.get_attribute(
-                    "title"
-                )
+            title = selected.get_attribute(
+                "title"
             )
 
             if not title:
 
                 try:
 
-                    title = (
-                        selected.inner_text()
-                    )
+                    title = selected.inner_text()
 
                 except Exception:
 
                     title = (
-                        f"YouTube result #{position}"
+                        f"YouTube result "
+                        f"#{position}"
                     )
 
             print(
@@ -507,7 +591,7 @@ class BrowserSkill:
             )
 
             # ==================================================
-            # OPEN RESULT
+            # CLICK
             # ==================================================
 
             print(
@@ -517,13 +601,13 @@ class BrowserSkill:
             selected.click()
 
             # ==================================================
-            # WAIT FOR VIDEO PAGE
+            # WAIT FOR VIDEO
             # ==================================================
 
             try:
 
-                self.page.wait_for_url(
-                    "**/watch**",
+                page.wait_for_url(
+                    "**/watch?**",
                     timeout=15000
                 )
 
@@ -534,43 +618,17 @@ class BrowserSkill:
                     "was not detected immediately."
                 )
 
-            # ==================================================
-            # GIVE YOUTUBE TIME TO START
-            # ==================================================
-
-            self.page.wait_for_timeout(
-                2000
-            )
-
-            # ==================================================
-            # FINAL STATUS
-            # ==================================================
-
             print(
                 f"✅ YouTube result "
                 f"#{position} opened."
             )
 
-            print(
-                "🎬 Video is now playing."
-            )
-
-            # ==================================================
-            # IMPORTANT
-            # ==================================================
+            # IMPORTANT:
             #
-            # DO NOT:
+            # DO NOT WAIT FOR ENTER.
             #
-            # input(...)
+            # DO NOT CLOSE BROWSER.
             #
-            # DO NOT:
-            #
-            # browser.close()
-            #
-            # The browser remains alive so SCOOBA
-            # can continue using it.
-            #
-            # ==================================================
 
             return True
 
@@ -596,15 +654,61 @@ class BrowserSkill:
             return False
 
     # ==================================================
-    # DESTRUCTOR
+    # CLEANUP
     # ==================================================
 
-    def __del__(self):
+    def _cleanup_browser(self):
 
         try:
 
-            self.close()
+            if (
+                self.context
+                and not self.context.is_closed()
+            ):
+
+                self.context.close()
 
         except Exception:
-
             pass
+
+        try:
+
+            if (
+                self.browser
+                and self.browser.is_connected()
+            ):
+
+                self.browser.close()
+
+        except Exception:
+            pass
+
+        try:
+
+            if self.playwright:
+
+                self.playwright.stop()
+
+        except Exception:
+            pass
+
+        self.page = None
+        self.context = None
+        self.browser = None
+        self.playwright = None
+
+    # ==================================================
+    # EXPLICIT CLOSE
+    # ==================================================
+
+    def close(self):
+
+        print(
+            "🌐 Closing SCOOBA browser..."
+        )
+
+        self._cleanup_browser()
+
+        print(
+            "✅ Browser closed."
+        )

@@ -7,7 +7,7 @@ ai = AIEngine()
 planner = Planner()
 
 
-command = "open youtube and search for avicii and play the third video"
+command = "open youtube search for pokemon play the third video"
 
 
 print(

@@ -4,12 +4,15 @@ SCOOBA
 
 Audio Recorder
 
+Continuous / Adaptive Speech Detection
+
 Author: Sachin
 ==================================================
 """
 
 import tempfile
 import queue
+import time
 
 import numpy as np
 import sounddevice as sd
@@ -20,43 +23,46 @@ class AudioRecorder:
 
     def __init__(self):
 
+        # ==================================================
+        # AUDIO
+        # ==================================================
+
         self.sample_rate = 16000
         self.channels = 1
 
-        # ------------------------------------------
-        # Audio configuration
-        # ------------------------------------------
-
+        # 30 ms audio frames
         self.block_duration = 0.03
 
-        # Time of silence required after speech
-        # before recording stops.
-        self.silence_duration = 1.0
+        # ==================================================
+        # LISTENING
+        # ==================================================
 
-        # Maximum command length.
-        self.max_duration = 15.0
-
-        # Maximum time to wait for the user
-        # to begin speaking.
+        # Maximum time to wait for speech to begin
         self.start_timeout = 10.0
 
-        # ------------------------------------------
-        # Voice detection configuration
-        # ------------------------------------------
+        # Absolute safety limit for one command
+        self.max_duration = 30.0
+
+        # Silence required before ending command
+        self.silence_duration = 1.7
+
+        # ==================================================
+        # NOISE CALIBRATION
+        # ==================================================
+
+        self.calibration_duration = 0.5
+
+        # ==================================================
+        # VOLUME THRESHOLDS
+        # ==================================================
 
         self.start_threshold_multiplier = 3.0
 
-        self.min_start_threshold = 0.008
-
         self.silence_threshold_multiplier = 1.8
 
-        self.min_silence_threshold = 0.005
+        self.minimum_speech_threshold = 0.008
 
-        # ------------------------------------------
-        # Noise calibration
-        # ------------------------------------------
-
-        self.calibration_duration = 0.4
+        self.minimum_silence_threshold = 0.005
 
     # ==================================================
     # RMS
@@ -64,8 +70,10 @@ class AudioRecorder:
 
     def _rms(self, audio):
 
-        if audio is None or len(audio) == 0:
+        if audio is None:
+            return 0.0
 
+        if len(audio) == 0:
             return 0.0
 
         audio = np.asarray(
@@ -87,26 +95,31 @@ class AudioRecorder:
 
     def record(self, duration=None):
 
-        print("\n🎤 Listening...")
+        print(
+            "\n🎤 Listening..."
+        )
+
         print(
             "   Waiting for speech..."
         )
 
-        # ------------------------------------------
-        # Configuration
-        # ------------------------------------------
+        # ==================================================
+        # CONFIGURATION
+        # ==================================================
 
         block_size = int(
             self.sample_rate
             * self.block_duration
         )
 
+        maximum_duration = (
+            duration
+            if duration is not None
+            else self.max_duration
+        )
+
         max_blocks = int(
-            (
-                duration
-                if duration
-                else self.max_duration
-            )
+            maximum_duration
             / self.block_duration
         )
 
@@ -120,20 +133,25 @@ class AudioRecorder:
             / self.block_duration
         )
 
-        # ------------------------------------------
-        # Audio queue
-        # ------------------------------------------
+        calibration_blocks = int(
+            self.calibration_duration
+            / self.block_duration
+        )
+
+        # ==================================================
+        # QUEUE
+        # ==================================================
 
         audio_queue = queue.Queue()
 
-        # ------------------------------------------
-        # Callback
-        # ------------------------------------------
+        # ==================================================
+        # CALLBACK
+        # ==================================================
 
         def callback(
             indata,
             frames,
-            time,
+            callback_time,
             status
         ):
 
@@ -148,97 +166,8 @@ class AudioRecorder:
             )
 
         # ==================================================
-        # CALIBRATE AMBIENT NOISE
+        # STATE
         # ==================================================
-
-        print(
-            "   Calibrating microphone..."
-        )
-
-        calibration_samples = []
-
-        try:
-
-            with sd.InputStream(
-                samplerate=self.sample_rate,
-                channels=self.channels,
-                dtype="float32",
-                blocksize=block_size
-            ) as stream:
-
-                calibration_blocks = int(
-                    self.calibration_duration
-                    / self.block_duration
-                )
-
-                for _ in range(
-                    calibration_blocks
-                ):
-
-                    data, overflowed = (
-                        stream.read(
-                            block_size
-                        )
-                    )
-
-                    calibration_samples.append(
-                        data.copy()
-                    )
-
-        except Exception as e:
-
-            print(
-                f"❌ Microphone calibration failed: {e}"
-            )
-
-            raise
-
-        # ------------------------------------------
-        # Calculate ambient noise
-        # ------------------------------------------
-
-        if calibration_samples:
-
-            calibration_audio = np.concatenate(
-                calibration_samples,
-                axis=0
-            )
-
-            noise_level = self._rms(
-                calibration_audio
-            )
-
-        else:
-
-            noise_level = 0.0
-
-        start_threshold = max(
-            self.min_start_threshold,
-            noise_level
-            * self.start_threshold_multiplier
-        )
-
-        silence_threshold = max(
-            self.min_silence_threshold,
-            noise_level
-            * self.silence_threshold_multiplier
-        )
-
-        print(
-            f"   Ambient level: "
-            f"{noise_level:.5f}"
-        )
-
-        print(
-            f"   Speech threshold: "
-            f"{start_threshold:.5f}"
-        )
-
-        # ==================================================
-        # RECORDING
-        # ==================================================
-
-        recorded_blocks = []
 
         speech_started = False
 
@@ -246,9 +175,11 @@ class AudioRecorder:
 
         total_blocks = 0
 
-        # ------------------------------------------
-        # Start microphone stream
-        # ------------------------------------------
+        recorded_blocks = []
+
+        # ==================================================
+        # MICROPHONE
+        # ==================================================
 
         try:
 
@@ -260,16 +191,104 @@ class AudioRecorder:
                 callback=callback
             ):
 
-                while True:
+                # ==================================================
+                # CALIBRATION
+                # ==================================================
 
-                    # ----------------------------------
-                    # Read next audio block
-                    # ----------------------------------
+                print(
+                    "   Calibrating microphone..."
+                )
+
+                calibration_samples = []
+
+                for _ in range(
+                    calibration_blocks
+                ):
 
                     try:
 
-                        data = audio_queue.get(
-                            timeout=1.0
+                        data = (
+                            audio_queue.get(
+                                timeout=1.0
+                            )
+                        )
+
+                        calibration_samples.append(
+                            data
+                        )
+
+                    except queue.Empty:
+
+                        continue
+
+                # ==================================================
+                # CALCULATE NOISE
+                # ==================================================
+
+                if calibration_samples:
+
+                    calibration_audio = (
+                        np.concatenate(
+                            calibration_samples,
+                            axis=0
+                        )
+                    )
+
+                    noise_level = self._rms(
+                        calibration_audio
+                    )
+
+                else:
+
+                    noise_level = 0.0
+
+                # ==================================================
+                # ADAPTIVE THRESHOLDS
+                # ==================================================
+
+                speech_threshold = max(
+                    self.minimum_speech_threshold,
+                    noise_level
+                    * self.start_threshold_multiplier
+                )
+
+                silence_threshold = max(
+                    self.minimum_silence_threshold,
+                    noise_level
+                    * self.silence_threshold_multiplier
+                )
+
+                print(
+                    f"   Ambient level: "
+                    f"{noise_level:.5f}"
+                )
+
+                print(
+                    f"   Speech threshold: "
+                    f"{speech_threshold:.5f}"
+                )
+
+                print(
+                    f"   Silence threshold: "
+                    f"{silence_threshold:.5f}"
+                )
+
+                # ==================================================
+                # MAIN LISTENING LOOP
+                # ==================================================
+
+                while True:
+
+                    # ------------------------------------------
+                    # Get next audio frame
+                    # ------------------------------------------
+
+                    try:
+
+                        data = (
+                            audio_queue.get(
+                                timeout=1.0
+                            )
                         )
 
                     except queue.Empty:
@@ -283,12 +302,12 @@ class AudioRecorder:
                     )
 
                     # ==================================================
-                    # WAITING FOR SPEECH
+                    # WAIT FOR SPEECH
                     # ==================================================
 
                     if not speech_started:
 
-                        if level >= start_threshold:
+                        if level >= speech_threshold:
 
                             speech_started = True
 
@@ -325,9 +344,9 @@ class AudioRecorder:
                         data
                     )
 
-                    # ----------------------------------
-                    # Detect silence
-                    # ----------------------------------
+                    # ==================================================
+                    # SILENCE DETECTION
+                    # ==================================================
 
                     if level < silence_threshold:
 
@@ -337,9 +356,9 @@ class AudioRecorder:
 
                         silence_counter = 0
 
-                    # ----------------------------------
-                    # User stopped speaking
-                    # ----------------------------------
+                    # ==================================================
+                    # COMMAND END
+                    # ==================================================
 
                     if (
                         silence_counter
@@ -347,14 +366,14 @@ class AudioRecorder:
                     ):
 
                         print(
-                            "🤫 Silence detected."
+                            "🤫 Natural pause detected."
                         )
 
                         break
 
-                    # ----------------------------------
-                    # Maximum duration
-                    # ----------------------------------
+                    # ==================================================
+                    # SAFETY LIMIT
+                    # ==================================================
 
                     if (
                         total_blocks
@@ -362,7 +381,7 @@ class AudioRecorder:
                     ):
 
                         print(
-                            "⏱ Maximum recording "
+                            "⏱ Maximum command "
                             "duration reached."
                         )
 
@@ -398,9 +417,12 @@ class AudioRecorder:
             delete=False
         )
 
+        # --------------------------------------------------
+        # No speech
+        # --------------------------------------------------
+
         if not blocks:
 
-            # Create a valid empty/silent WAV.
             audio = np.zeros(
                 int(
                     self.sample_rate
@@ -409,12 +431,20 @@ class AudioRecorder:
                 dtype=np.float32
             )
 
+        # --------------------------------------------------
+        # Speech
+        # --------------------------------------------------
+
         else:
 
             audio = np.concatenate(
                 blocks,
                 axis=0
             )
+
+        # ==================================================
+        # WRITE WAV
+        # ==================================================
 
         sf.write(
             temp.name,

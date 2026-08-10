@@ -34,7 +34,6 @@ class IntentClassifier:
         "SEARCH": {
             "search",
             "find",
-            "google",
             "lookup"
         },
 
@@ -86,6 +85,17 @@ class IntentClassifier:
         words = set(lemmas)
 
         # ==================================================
+        # CLOSE APP
+        # ==================================================
+        #
+        # Check explicit commands first.
+        #
+
+        if words & self.VERBS["CLOSE_APP"]:
+
+            return "CLOSE_APP"
+
+        # ==================================================
         # PLAY VIDEO
         # ==================================================
 
@@ -94,28 +104,45 @@ class IntentClassifier:
             return "PLAY_VIDEO"
 
         # ==================================================
-        # SEARCH
-        # ==================================================
-
-        if words & self.VERBS["SEARCH"]:
-
-            return "SEARCH"
-
-        # ==================================================
         # OPEN APP
         # ==================================================
+        #
+        # IMPORTANT:
+        #
+        # "open google"
+        # "open youtube"
+        # "launch github"
+        #
+        # must be OPEN_APP.
+        #
+        # Site names are entities, not actions.
+        #
 
         if words & self.VERBS["OPEN_APP"]:
 
             return "OPEN_APP"
 
         # ==================================================
-        # CLOSE APP
+        # SEARCH
         # ==================================================
+        #
+        # IMPORTANT:
+        #
+        # "google" is NOT treated as a search verb anymore.
+        #
+        # The actual search verbs are:
+        #
+        # search
+        # find
+        # lookup
+        #
+        # "google" is handled as a browser target/entity
+        # by the NLP processor.
+        #
 
-        if words & self.VERBS["CLOSE_APP"]:
+        if words & self.VERBS["SEARCH"]:
 
-            return "CLOSE_APP"
+            return "SEARCH"
 
         # ==================================================
         # GREETING
@@ -155,5 +182,9 @@ class IntentClassifier:
             ):
 
                 return "CREATE_PYTHON_PROJECT"
+
+        # ==================================================
+        # UNKNOWN
+        # ==================================================
 
         return None
