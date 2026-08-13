@@ -67,7 +67,7 @@ class SCOOBA:
         #
         # Executor uses the SAME SkillManager
         # instance as SCOOBA.
-        #
+
         self.executor = Executor(
             self.skills
         )
@@ -179,13 +179,17 @@ class SCOOBA:
 
         self.service_manager.start_all()
 
-        print("=" * 50)
+        print(
+            "=" * 50
+        )
 
         print(
             f"{self.name} v{self.version}"
         )
 
-        print("=" * 50)
+        print(
+            "=" * 50
+        )
 
         # ==================================================
         # GREETING
@@ -278,12 +282,14 @@ class SCOOBA:
                 # ------------------------------------------
 
                 normalized_text = (
+
                     text
                     .lower()
                     .strip()
                     .rstrip(
                         "!.,?;:"
                     )
+
                 )
 
                 exit_commands = [
@@ -296,11 +302,15 @@ class SCOOBA:
                 ]
 
                 if (
+
                     normalized_text
                     in exit_commands
+
                     or
+
                     decision.intent
                     == "CLOSE_APP"
+
                 ):
 
                     self.set_state(
@@ -327,13 +337,110 @@ class SCOOBA:
                     break
 
                 # ------------------------------------------
+                # PERSONALITY MODE
+                # ------------------------------------------
+                #
+                # Personality changes are internal state
+                # changes and must not go through planning
+                # or execution.
+                #
+
+                if (
+
+                    decision.intent
+                    == "PERSONALITY_MODE"
+
+                ):
+
+                    response = (
+
+                        self.dispatcher.response(
+                            decision
+                        )
+
+                    )
+
+                    print(
+                        f"\n🎭 Personality Mode: "
+                        f"{self.dispatcher.personality.get_mode()}"
+                    )
+
+                    if response:
+
+                        self.set_state(
+                            AssistantState.SPEAKING
+                        )
+
+                        self.voice.tts.speak(
+                            response
+                        )
+
+                        self.set_state(
+                            AssistantState.READY
+                        )
+
+                    continue
+
+                # ------------------------------------------
+                # CONVERSATION
+                # ------------------------------------------
+                #
+                # Conversation must NOT go through:
+                #
+                # Planner
+                # Executor
+                #
+                # It goes directly to the personality system,
+                # which can use the current personality mode
+                # and conversation history.
+                #
+
+                if (
+
+                    decision.intent
+                    == "CONVERSATION"
+
+                ):
+
+                    print(
+                        "\n💬 Conversation detected."
+                    )
+
+                    response = (
+
+                        self.dispatcher.response(
+                            decision,
+                            None
+                        )
+
+                    )
+
+                    if response:
+
+                        self.set_state(
+                            AssistantState.SPEAKING
+                        )
+
+                        self.voice.tts.speak(
+                            response
+                        )
+
+                        self.set_state(
+                            AssistantState.READY
+                        )
+
+                    continue
+
+                # ------------------------------------------
                 # PLANNING
                 # ------------------------------------------
 
                 plan = (
+
                     self.planner.create_plan(
                         decision
                     )
+
                 )
 
                 # ------------------------------------------
@@ -341,8 +448,6 @@ class SCOOBA:
                 # ------------------------------------------
                 #
                 # Executor receives the complete plan.
-                #
-                # IMPORTANT:
                 #
                 # Do NOT additionally call:
                 #
@@ -352,9 +457,11 @@ class SCOOBA:
                 #
 
                 success = (
+
                     self.executor.execute(
                         plan
                     )
+
                 )
 
                 # ------------------------------------------
@@ -371,10 +478,12 @@ class SCOOBA:
                 # ------------------------------------------
 
                 response = (
+
                     self.dispatcher.response(
                         decision,
                         success
                     )
+
                 )
 
                 # ------------------------------------------

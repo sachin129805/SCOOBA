@@ -50,6 +50,12 @@ class Decision:
     position: Optional[int] = None
 
     # ==================================================
+    # PERSONALITY MODE
+    # ==================================================
+
+    personality_mode: Optional[str] = None
+
+    # ==================================================
     # ORIGINAL COMMAND
     # ==================================================
 
@@ -69,21 +75,6 @@ class Decision:
 
     # ==================================================
     # MULTI-STEP DECISIONS
-    # ==================================================
-    #
-    # Example:
-    #
-    # "open youtube and search avicii and play
-    #  the third video"
-    #
-    # becomes:
-    #
-    # steps = [
-    #     OPEN_APP,
-    #     SEARCH,
-    #     PLAY_VIDEO
-    # ]
-    #
     # ==================================================
 
     steps: List["Decision"] = field(

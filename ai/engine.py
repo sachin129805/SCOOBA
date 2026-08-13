@@ -8,8 +8,6 @@ Author: Sachin
 ==================================================
 """
 
-import re
-
 from ai.nlp.processor import NLPProcessor
 from ai.decision import Decision
 
@@ -24,13 +22,6 @@ class AIEngine:
 
         self.app_resolver = ApplicationResolver()
 
-        # ==================================================
-        # CONVERSATIONAL CONTEXT
-        # ==================================================
-
-        self.last_query = None
-        self.last_target = None
-
     # ==================================================
     # NORMALIZATION
     # ==================================================
@@ -44,6 +35,20 @@ class AIEngine:
         )
 
         replacements = {
+
+            # ==========================================
+            # PERSONALITY MODE SPEECH CORRECTIONS
+            # ==========================================
+
+            "switch to abuse your mode": "switch to abusive mode",
+            "switch to abuse your": "switch to abusive",
+            "abuse your mode": "abusive mode",
+            "abuse your": "abusive",
+            "abuse mode": "abusive mode",
+
+            # ==========================================
+            # OTHER CORRECTIONS
+            # ==========================================
 
             "what's up": "whatsapp",
             "whats up": "whatsapp",
@@ -66,9 +71,7 @@ class AIEngine:
 
             "vs code": "visual studio code",
 
-            "visual studio": (
-                "visual studio code"
-            ),
+            "visual studio": "visual studio code",
 
             "git hub": "github"
         }
@@ -86,377 +89,51 @@ class AIEngine:
     # MULTI-STEP DETECTION
     # ==================================================
 
-    def is_multi_step(
-        self,
-        text: str
-    ):
+    def is_multi_step(self, text: str):
 
-        text = (
-            text
-            .lower()
-            .strip()
-        )
-
-        # --------------------------------------------------
-        # Explicit connectors
-        # --------------------------------------------------
-
-        connectors = [
+        markers = [
 
             " and ",
             " then ",
             " after that ",
             " followed by ",
             " next "
-
         ]
 
-        if any(
-            connector in text
-            for connector in connectors
-        ):
-
-            return True
-
-        # --------------------------------------------------
-        # Natural action transitions
-        #
-        # Example:
-        #
-        # open youtube search for pokemon
-        #
-        # Example:
-        #
-        # open youtube search for pokemon
-        # play the third video
-        # --------------------------------------------------
-
-        action_pattern = re.compile(
-            r"\b("
-            r"open|launch|start|run|"
-            r"search|find|lookup|"
-            r"play|watch|"
-            r"create|make|generate|build|"
-            r"close|quit|exit|terminate"
-            r")\b"
+        return any(
+            marker in text
+            for marker in markers
         )
-
-        matches = list(
-            action_pattern.finditer(
-                text
-            )
-        )
-
-        return len(matches) >= 2
 
     # ==================================================
     # SPLIT MULTI-STEP COMMAND
     # ==================================================
 
-    def split_steps(
-        self,
-        text: str
-    ):
+    def split_steps(self, text: str):
 
-        text = (
-            text
-            .lower()
-            .strip()
-        )
+        replacements = [
 
-        # ==================================================
-        # NORMALIZE CONNECTORS
-        # ==================================================
+            " after that ",
+            " followed by ",
+            " then ",
+            " next "
+        ]
 
-        text = re.sub(
-            r"\s+after that\s+",
-            " and ",
-            text
-        )
+        for replacement in replacements:
 
-        text = re.sub(
-            r"\s+followed by\s+",
-            " and ",
-            text
-        )
-
-        text = re.sub(
-            r"\s+then\s+",
-            " and ",
-            text
-        )
-
-        text = re.sub(
-            r"\s+next\s+",
-            " and ",
-            text
-        )
-
-        # ==================================================
-        # EXPLICIT "AND"
-        # ==================================================
-
-        if " and " in text:
-
-            parts = [
-
-                part.strip()
-
-                for part in text.split(
-                    " and "
-                )
-
-                if part.strip()
-
-            ]
-
-            cleaned = []
-
-            for part in parts:
-
-                part = part.strip()
-
-                for prefix in [
-
-                    "then ",
-                    "next ",
-                    "after that ",
-                    "followed by "
-
-                ]:
-
-                    if part.startswith(
-                        prefix
-                    ):
-
-                        part = (
-                            part[
-                                len(prefix):
-                            ]
-                            .strip()
-                        )
-
-                if part:
-
-                    cleaned.append(
-                        part
-                    )
-
-            return cleaned
-
-        # ==================================================
-        # NATURAL ACTION SEGMENTATION
-        # ==================================================
-
-        action_regex = re.compile(
-            r"\b("
-            r"open|launch|start|run|"
-            r"search|find|lookup|"
-            r"play|watch|"
-            r"create|make|generate|build|"
-            r"close|quit|exit|terminate"
-            r")\b"
-        )
-
-        matches = list(
-            action_regex.finditer(
-                text
-            )
-        )
-
-        if len(matches) < 2:
-
-            return [
-                text
-            ]
-
-        # ==================================================
-        # ACTION BOUNDARIES
-        # ==================================================
-
-        boundaries = []
-
-        for index, match in enumerate(
-            matches
-        ):
-
-            verb = match.group(1)
-
-            start = match.start()
-
-            # First action
-            if index == 0:
-
-                boundaries.append(
-                    start
-                )
-
-                continue
-
-            # --------------------------------------------------
-            # SEARCH
-            # --------------------------------------------------
-
-            if verb in {
-
-                "search",
-                "find",
-                "lookup"
-
-            }:
-
-                boundaries.append(
-                    start
-                )
-
-                continue
-
-            # --------------------------------------------------
-            # PLAY / WATCH
-            # --------------------------------------------------
-
-            if verb in {
-
-                "play",
-                "watch"
-
-            }:
-
-                remaining = (
-                    text[
-                        match.end():
-                    ]
-                    .strip()
-                )
-
-                playback_indicators = (
-
-                    "video",
-                    "song",
-                    "movie",
-                    "result",
-                    "track",
-                    "episode",
-                    "clip",
-
-                    "the first",
-                    "the second",
-                    "the third",
-                    "the fourth",
-                    "the fifth",
-                    "the sixth",
-                    "the seventh",
-                    "the eighth",
-                    "the ninth",
-                    "the tenth",
-
-                    "first video",
-                    "second video",
-                    "third video",
-                    "fourth video",
-                    "fifth video",
-
-                    "first result",
-                    "second result",
-                    "third result",
-                    "fourth result",
-                    "fifth result"
-
-                )
-
-                if any(
-                    indicator in remaining
-                    for indicator in
-                    playback_indicators
-                ):
-
-                    boundaries.append(
-                        start
-                    )
-
-                    continue
-
-                # Generic "play X" after another action
-                if index > 0:
-
-                    boundaries.append(
-                        start
-                    )
-
-                    continue
-
-            # --------------------------------------------------
-            # OPEN / CREATE / CLOSE
-            # --------------------------------------------------
-
-            if verb in {
-
-                "open",
-                "launch",
-                "start",
-                "run",
-
-                "create",
-                "make",
-                "generate",
-                "build",
-
-                "close",
-                "quit",
-                "exit",
-                "terminate"
-
-            }:
-
-                boundaries.append(
-                    start
-                )
-
-        boundaries = sorted(
-            set(boundaries)
-        )
-
-        if len(boundaries) < 2:
-
-            return [
-                text
-            ]
-
-        # ==================================================
-        # BUILD COMMAND PARTS
-        # ==================================================
-
-        parts = []
-
-        for index, start in enumerate(
-            boundaries
-        ):
-
-            if (
-                index + 1
-                < len(boundaries)
-            ):
-
-                end = boundaries[
-                    index + 1
-                ]
-
-            else:
-
-                end = len(text)
-
-            part = (
-                text[
-                    start:end
-                ]
-                .strip()
+            text = text.replace(
+                replacement,
+                " and "
             )
 
-            if part:
+        parts = [
 
-                parts.append(
-                    part
-                )
+            part.strip()
+
+            for part in text.split(" and ")
+
+            if part.strip()
+        ]
 
         return parts
 
@@ -464,19 +141,13 @@ class AIEngine:
     # CLEAN QUERY
     # ==================================================
 
-    def clean_query(
-        self,
-        query
-    ):
+    def clean_query(self, query):
 
         if not query:
 
             return query
 
-        query = (
-            query
-            .strip()
-        )
+        query = query.strip()
 
         prefixes = [
 
@@ -485,21 +156,15 @@ class AIEngine:
             "on ",
             "regarding ",
             "related to "
-
         ]
 
         for prefix in prefixes:
 
-            if query.startswith(
-                prefix
-            ):
+            if query.startswith(prefix):
 
-                query = (
-                    query[
-                        len(prefix):
-                    ]
-                    .strip()
-                )
+                query = query[
+                    len(prefix):
+                ].strip()
 
                 break
 
@@ -509,13 +174,10 @@ class AIEngine:
     # SINGLE COMMAND
     # ==================================================
 
-    def think_single(
-        self,
-        text: str
-    ):
+    def think_single(self, text: str):
 
         # ==================================================
-        # NLP
+        # NLP PROCESSING
         # ==================================================
 
         result = self.processor.process(
@@ -523,6 +185,10 @@ class AIEngine:
         )
 
         decision = Decision()
+
+        # ==================================================
+        # BASIC DECISION DATA
+        # ==================================================
 
         decision.intent = result.get(
             "intent"
@@ -552,46 +218,25 @@ class AIEngine:
             "position"
         )
 
+        # ==================================================
+        # PERSONALITY MODE
+        # ==================================================
+
+        decision.personality_mode = result.get(
+            "personality_mode"
+        )
+
         decision.command = text
 
         # ==================================================
-        # QUERY CLEANING
+        # CLEAN QUERY
         # ==================================================
 
         if decision.query:
 
-            decision.query = (
-                self.clean_query(
-                    decision.query
-                )
+            decision.query = self.clean_query(
+                decision.query
             )
-
-        # ==================================================
-        # PLAY VIDEO QUERY CLEANUP
-        # ==================================================
-        #
-        # NLP can sometimes interpret:
-        #
-        # "play the 5th video"
-        #
-        # as:
-        #
-        # query = "the"
-        #
-        # "the" is not a search query.
-        # ==================================================
-
-        if decision.intent == "PLAY_VIDEO":
-
-            if decision.query in {
-
-                "the",
-                "a",
-                "an"
-
-            }:
-
-                decision.query = None
 
         # ==================================================
         # APP RESOLUTION
@@ -617,22 +262,15 @@ class AIEngine:
                         ""
                     )
 
-                words = (
-                    words
-                    .strip()
-                )
+                words = words.strip()
 
-                app = (
-                    self.app_resolver.resolve(
-                        words
-                    )
+                app = self.app_resolver.resolve(
+                    words
                 )
 
                 if app:
 
-                    decision.entity = (
-                        words
-                    )
+                    decision.entity = words
 
                 else:
 
@@ -641,10 +279,8 @@ class AIEngine:
                         []
                     ):
 
-                        app = (
-                            self.app_resolver.resolve(
-                                token
-                            )
+                        app = self.app_resolver.resolve(
+                            token
                         )
 
                         if app:
@@ -684,6 +320,10 @@ class AIEngine:
 
                 decision.action = "play"
 
+            elif decision.intent == "CONVERSATION":
+
+                decision.action = "chat"
+
         # ==================================================
         # CONFIDENCE
         # ==================================================
@@ -691,14 +331,17 @@ class AIEngine:
         decision.confidence = (
 
             1.0
+
             if decision.intent
+
             else 0.0
+
         )
 
         return decision
 
     # ==================================================
-    # EXPLICIT TARGET DETECTION
+    # FIND EXPLICIT TARGET
     # ==================================================
 
     def _find_explicit_target(
@@ -729,7 +372,6 @@ class AIEngine:
             "twitter",
             "reddit",
             "amazon"
-
         ]
 
         for target in targets:
@@ -741,139 +383,13 @@ class AIEngine:
         return None
 
     # ==================================================
-    # UPDATE PERSISTENT CONTEXT
-    # ==================================================
-
-    def _update_context(
-        self,
-        decision
-    ):
-
-        # --------------------------------------------------
-        # Save useful query
-        # --------------------------------------------------
-
-        if decision.query:
-
-            cleaned = (
-                self.clean_query(
-                    decision.query
-                )
-            )
-
-            if cleaned:
-
-                self.last_query = (
-                    cleaned
-                )
-
-        # --------------------------------------------------
-        # Save target
-        # --------------------------------------------------
-
-        if decision.target:
-
-            self.last_target = (
-                decision.target
-                .lower()
-                .strip()
-            )
-
-        elif decision.entity:
-
-            self.last_target = (
-                decision.entity
-                .lower()
-                .strip()
-            )
-
-    # ==================================================
-    # APPLY CONTEXT TO PLAY VIDEO
-    # ==================================================
-
-    def _apply_video_context(
-        self,
-        decision
-    ):
-
-        if decision.intent != "PLAY_VIDEO":
-
-            return decision
-
-        # --------------------------------------------------
-        # Ignore invalid NLP query
-        # --------------------------------------------------
-
-        if decision.query in {
-
-            "the",
-            "a",
-            "an"
-
-        }:
-
-            decision.query = None
-
-        # --------------------------------------------------
-        # Use previous search query
-        # --------------------------------------------------
-
-        if (
-            not decision.query
-            and self.last_query
-        ):
-
-            decision.query = (
-                self.last_query
-            )
-
-        # --------------------------------------------------
-        # Use previous target
-        # --------------------------------------------------
-
-        if (
-            not decision.target
-            and self.last_target
-        ):
-
-            decision.target = (
-                self.last_target
-            )
-
-            decision.entity = (
-                decision.entity
-                or self.last_target
-            )
-
-        # --------------------------------------------------
-        # Video defaults to YouTube
-        # --------------------------------------------------
-
-        if not decision.target:
-
-            decision.target = (
-                "youtube"
-            )
-
-        if not decision.entity:
-
-            decision.entity = (
-                decision.target
-            )
-
-        return decision
-
-    # ==================================================
     # MAIN THINK
     # ==================================================
 
-    def think(
-        self,
-        text: str
-    ):
+    def think(self, text: str):
 
         # ==================================================
-        # NORMALIZATION
+        # NORMALIZE
         # ==================================================
 
         text = self.normalize(
@@ -884,9 +400,7 @@ class AIEngine:
         # MULTI-STEP
         # ==================================================
 
-        if self.is_multi_step(
-            text
-        ):
+        if self.is_multi_step(text):
 
             parts = self.split_steps(
                 text
@@ -894,38 +408,34 @@ class AIEngine:
 
             decisions = []
 
-            # ==================================================
+            # ==============================================
             # FIRST PASS
-            # ==================================================
+            # ==============================================
 
             for part in parts:
 
-                decision = (
-                    self.think_single(
-                        part
-                    )
+                decision = self.think_single(
+                    part
                 )
 
                 if decision.intent:
 
-                    decision.command = (
-                        part
-                    )
+                    decision.command = part
 
                     decisions.append(
                         decision
                     )
 
-            # ==================================================
-            # CONTEXT
-            # ==================================================
+            # ==============================================
+            # CONTEXT VARIABLES
+            # ==============================================
 
             last_target = None
             last_query = None
 
-            # ==================================================
+            # ==============================================
             # SECOND PASS
-            # ==================================================
+            # ==============================================
 
             for decision in decisions:
 
@@ -934,21 +444,15 @@ class AIEngine:
                     or ""
                 )
 
-                command = (
-                    command
-                    .lower()
-                    .strip()
-                )
-
                 explicit_target = (
                     self._find_explicit_target(
                         command
                     )
                 )
 
-                # ==================================================
+                # ==========================================
                 # OPEN APP
-                # ==================================================
+                # ==========================================
 
                 if (
                     decision.intent
@@ -981,9 +485,9 @@ class AIEngine:
                             last_target
                         )
 
-                # ==================================================
+                # ==========================================
                 # SEARCH
-                # ==================================================
+                # ==========================================
 
                 elif (
                     decision.intent
@@ -1024,9 +528,9 @@ class AIEngine:
                             "google"
                         )
 
-                # ==================================================
+                # ==========================================
                 # PLAY VIDEO
-                # ==================================================
+                # ==========================================
 
                 elif (
                     decision.intent
@@ -1071,73 +575,40 @@ class AIEngine:
                             "youtube"
                         )
 
-                # ==================================================
+                # ==========================================
                 # QUERY INHERITANCE
-                # ==================================================
+                # ==========================================
 
                 if decision.query:
 
-                    decision.query = (
-                        self.clean_query(
-                            decision.query
-                        )
+                    decision.query = self.clean_query(
+                        decision.query
                     )
 
-                    # Do not remember meaningless
-                    # determiner queries.
-
-                    if decision.query in {
-
-                        "the",
-                        "a",
-                        "an"
-
-                    }:
-
-                        decision.query = None
-
-                    else:
-
-                        last_query = (
-                            decision.query
-                        )
+                    last_query = (
+                        decision.query
+                    )
 
                 elif (
                     decision.intent
                     == "PLAY_VIDEO"
+                    and last_query
                 ):
 
-                    if last_query:
+                    decision.query = (
+                        last_query
+                    )
 
-                        decision.query = (
-                            last_query
-                        )
-
-            # ==================================================
-            # UPDATE PERSISTENT CONTEXT
-            #
-            # This is what allows:
-            #
-            # search for pokemon
-            # play the fifth video
-            #
-            # across separate calls.
-            # ==================================================
-
-            for decision in decisions:
-
-                self._update_context(
-                    decision
-                )
-
-            # ==================================================
+            # ==============================================
             # MAIN DECISION
-            # ==================================================
+            # ==============================================
 
             main_decision = (
 
                 decisions[0]
+
                 if decisions
+
                 else Decision()
             )
 
@@ -1160,9 +631,9 @@ class AIEngine:
                 )
             )
 
-            # ==================================================
+            # ==============================================
             # DEBUG
-            # ==================================================
+            # ==============================================
 
             print(
                 "\n========== MULTI-STEP AI =========="
@@ -1178,33 +649,32 @@ class AIEngine:
                 )
 
                 print(
-                    f"Intent   : "
-                    f"{decision.intent}"
+                    f"Intent   : {decision.intent}"
                 )
 
                 print(
-                    f"Entity   : "
-                    f"{decision.entity}"
+                    f"Entity   : {decision.entity}"
                 )
 
                 print(
-                    f"Action   : "
-                    f"{decision.action}"
+                    f"Action   : {decision.action}"
                 )
 
                 print(
-                    f"Query    : "
-                    f"{decision.query}"
+                    f"Query    : {decision.query}"
                 )
 
                 print(
-                    f"Target   : "
-                    f"{decision.target}"
+                    f"Target   : {decision.target}"
                 )
 
                 print(
-                    f"Position : "
-                    f"{decision.position}"
+                    f"Position : {decision.position}"
+                )
+
+                print(
+                    f"Mode     : "
+                    f"{getattr(decision, 'personality_mode', None)}"
                 )
 
             print(
@@ -1222,22 +692,20 @@ class AIEngine:
         )
 
         # ==================================================
-        # APPLY PERSISTENT VIDEO CONTEXT
+        # CONVERSATION FALLBACK
         # ==================================================
 
-        decision = (
-            self._apply_video_context(
-                decision
+        if not decision.intent:
+
+            decision.intent = (
+                "CONVERSATION"
             )
-        )
 
-        # ==================================================
-        # UPDATE PERSISTENT CONTEXT
-        # ==================================================
+            decision.action = (
+                "chat"
+            )
 
-        self._update_context(
-            decision
-        )
+            decision.confidence = 1.0
 
         # ==================================================
         # DEBUG
@@ -1248,48 +716,44 @@ class AIEngine:
         )
 
         print(
-            f"Intent      : "
-            f"{decision.intent}"
+            f"Intent      : {decision.intent}"
         )
 
         print(
-            f"Entity      : "
-            f"{decision.entity}"
+            f"Entity      : {decision.entity}"
         )
 
         print(
-            f"Action      : "
-            f"{decision.action}"
+            f"Action      : {decision.action}"
         )
 
         print(
-            f"Query       : "
-            f"{decision.query}"
+            f"Query       : {decision.query}"
         )
 
         print(
-            f"Target      : "
-            f"{decision.target}"
+            f"Target      : {decision.target}"
         )
 
         print(
-            f"Position    : "
-            f"{decision.position}"
+            f"Position    : {decision.position}"
         )
 
         print(
-            f"Location    : "
-            f"{decision.location}"
+            f"Location    : {decision.location}"
         )
 
         print(
-            f"Command     : "
-            f"{decision.command}"
+            f"Mode        : "
+            f"{getattr(decision, 'personality_mode', None)}"
         )
 
         print(
-            f"Confidence  : "
-            f"{decision.confidence}"
+            f"Command     : {decision.command}"
+        )
+
+        print(
+            f"Confidence  : {decision.confidence}"
         )
 
         print(
