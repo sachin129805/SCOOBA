@@ -1,3 +1,4 @@
+
 """
 ==================================================
 SCOOBA
@@ -10,8 +11,16 @@ Author: Sachin
 
 import random
 
+from personality.dynamic import (
+    DynamicResponseGenerator
+)
+
 
 class PersonalityEngine:
+
+    # ==================================================
+    # AVAILABLE MODES
+    # ==================================================
 
     MODES = {
         "NORMAL",
@@ -19,8 +28,66 @@ class PersonalityEngine:
         "SARCASTIC",
         "ROASTING",
         "ABUSIVE",
-        "MIXED",
+        "MIXED"
     }
+
+    # ==================================================
+    # PERSONALITY PROFILES
+    # ==================================================
+
+    PERSONALITY_PROFILES = {
+
+        "NORMAL": {
+            "tone": (
+                "professional, calm, helpful and concise"
+            ),
+            "intensity": 1
+        },
+
+        "FAMILY": {
+            "tone": (
+                "warm, friendly, supportive and completely clean"
+            ),
+            "intensity": 1
+        },
+
+        "SARCASTIC": {
+            "tone": (
+                "dry, witty and sarcastic with light teasing"
+            ),
+            "intensity": 2
+        },
+
+        "ROASTING": {
+            "tone": (
+                "aggressively playful, mocking and insulting "
+                "like a close friend roasting the user"
+            ),
+            "intensity": 4
+        },
+
+        "ABUSIVE": {
+            "tone": (
+                "extremely aggressive fictional AI banter, "
+                "heavy profanity, harsh insults, hostile "
+                "attitude and zero unnecessary politeness"
+            ),
+            "intensity": 5
+        },
+
+        "MIXED": {
+            "tone": (
+                "unpredictable combination of friendly, "
+                "sarcastic, roasting and profane behavior"
+            ),
+            "intensity": 5
+        }
+
+    }
+
+    # ==================================================
+    # INITIALIZE
+    # ==================================================
 
     def __init__(self):
 
@@ -31,89 +98,43 @@ class PersonalityEngine:
         self.mode = "NORMAL"
 
         # ------------------------------------------
-        # SHORT-TERM CONVERSATION MEMORY
+        # DYNAMIC RESPONSE GENERATOR
+        # ------------------------------------------
+
+        self.dynamic = (
+            DynamicResponseGenerator()
+        )
+
+        # ------------------------------------------
+        # SHORT-TERM MEMORY
         # ------------------------------------------
 
         self.last_intent = None
+
         self.last_entity = None
+
         self.last_query = None
+
         self.last_success = None
 
         # ------------------------------------------
-        # SAFE BASE RESPONSES
+        # CONVERSATION MEMORY
         #
-        # These are building material, not complete
-        # personality responses.
+        # Stores recent user/SCOOBA exchanges.
+        #
+        # Example:
+        #
+        # {
+        #     "user": "open youtube",
+        #     "assistant": "YouTube is open."
+        # }
+        #
         # ------------------------------------------
 
-        self.base = {
+        self.conversation_history = []
 
-            "GREETING": [
-                "Hello.",
-                "Welcome back.",
-                "Good to see you.",
-                "I'm here.",
-            ],
-
-            "OPEN_APP_SUCCESS": [
-                "Opening {entity}.",
-                "{entity} is opening.",
-                "Launching {entity}.",
-                "{entity} is ready.",
-            ],
-
-            "OPEN_APP_FAILED": [
-                "I couldn't open {entity}.",
-                "I wasn't able to launch {entity}.",
-                "Opening {entity} failed.",
-            ],
-
-            "SEARCH_SUCCESS": [
-                "Searching for {query}.",
-                "Looking up {query}.",
-                "Searching {query}.",
-                "Got it. Searching for {query}.",
-            ],
-
-            "SEARCH_FAILED": [
-                "I couldn't complete that search.",
-                "The search didn't complete successfully.",
-                "I couldn't finish that search.",
-            ],
-
-            "PLAY_VIDEO_SUCCESS": [
-                "Playing video {position}.",
-                "Opening video {position}.",
-                "Video {position}, coming up.",
-                "Playing the requested video.",
-            ],
-
-            "PLAY_VIDEO_FAILED": [
-                "I couldn't play that video.",
-                "I wasn't able to open the requested video.",
-                "The video didn't open successfully.",
-            ],
-
-            "UNKNOWN": [
-                "I didn't understand that.",
-                "I'm not sure what you want me to do.",
-                "I couldn't determine the requested action.",
-                "I need a clearer command.",
-            ],
-
-            "SUCCESS": [
-                "Done.",
-                "Completed.",
-                "That's done.",
-                "Handled.",
-            ],
-
-            "FAILED": [
-                "That didn't work.",
-                "The task failed.",
-                "I couldn't complete that.",
-            ],
-        }
+        # Number of recent exchanges to retain.
+        self.max_history = 10
 
     # ==================================================
     # MODE MANAGEMENT
@@ -121,24 +142,51 @@ class PersonalityEngine:
 
     def set_mode(self, mode):
 
-        mode = str(mode).strip().upper()
+        mode = (
+            str(mode)
+            .strip()
+            .upper()
+        )
 
         if mode not in self.MODES:
+
             return False
 
         self.mode = mode
 
         return True
 
+    # ==================================================
+
     def get_mode(self):
 
         return self.mode
 
     # ==================================================
-    # MEMORY
+    # PERSONALITY PROFILE
     # ==================================================
 
-    def remember(self, decision, success=None):
+    def get_profile(self):
+
+        return (
+            self.PERSONALITY_PROFILES
+            .get(
+                self.mode,
+                self.PERSONALITY_PROFILES[
+                    "NORMAL"
+                ]
+            )
+        )
+
+    # ==================================================
+    # TASK MEMORY
+    # ==================================================
+
+    def remember(
+        self,
+        decision,
+        success=None
+    ):
 
         self.last_intent = getattr(
             decision,
@@ -161,7 +209,113 @@ class PersonalityEngine:
         self.last_success = success
 
     # ==================================================
-    # BASE RESPONSE
+    # CONVERSATION MEMORY
+    # ==================================================
+
+    def remember_conversation(
+        self,
+        user_message,
+        assistant_response
+    ):
+
+        if not user_message:
+
+            return
+
+        if not assistant_response:
+
+            return
+
+        exchange = {
+
+            "user": (
+                str(user_message)
+                .strip()
+            ),
+
+            "assistant": (
+                str(assistant_response)
+                .strip()
+            )
+
+        }
+
+        self.conversation_history.append(
+            exchange
+        )
+
+        # ------------------------------------------
+        # Keep only recent exchanges
+        # ------------------------------------------
+
+        if (
+            len(
+                self.conversation_history
+            )
+            > self.max_history
+        ):
+
+            self.conversation_history = (
+                self.conversation_history[
+                    -self.max_history:
+                ]
+            )
+
+    # ==================================================
+    # GET CONVERSATION HISTORY
+    # ==================================================
+
+    def get_conversation_history(self):
+
+        return list(
+            self.conversation_history
+        )
+
+    # ==================================================
+    # CLEAR CONVERSATION
+    # ==================================================
+
+    def clear_conversation(self):
+
+        self.conversation_history.clear()
+
+    # ==================================================
+    # LAST CONVERSATION
+    # ==================================================
+
+    def get_last_conversation(self):
+
+        if not self.conversation_history:
+
+            return None
+
+        return (
+            self.conversation_history[-1]
+        )
+
+    # ==================================================
+    # CONVERSATION CONTEXT
+    # ==================================================
+
+    def get_conversation_context(
+        self,
+        max_exchanges=None
+    ):
+
+        if max_exchanges is None:
+
+            max_exchanges = self.max_history
+
+        history = (
+            self.conversation_history[
+                -max_exchanges:
+            ]
+        )
+
+        return list(history)
+
+    # ==================================================
+    # SAFE FALLBACK RESPONSES
     # ==================================================
 
     def _base_response(
@@ -173,7 +327,14 @@ class PersonalityEngine:
         success=None
     ):
 
-        intent = intent or "UNKNOWN"
+        intent = (
+            intent
+            or "UNKNOWN"
+        )
+
+        # ------------------------------------------
+        # RESPONSE CATEGORY
+        # ------------------------------------------
 
         if success is None:
 
@@ -211,35 +372,321 @@ class PersonalityEngine:
                 else "FAILED"
             )
 
-        choices = self.base.get(
+        # ------------------------------------------
+        # FALLBACK TABLE
+        # ------------------------------------------
+
+        responses = {
+
+            "GREETING": [
+
+                "Hello.",
+
+                "Welcome back.",
+
+                "Good to see you.",
+
+                "I'm here."
+
+            ],
+
+            "OPEN_APP_SUCCESS": [
+
+                "Opening {entity}.",
+
+                "{entity} is open.",
+
+                "Launching {entity}.",
+
+                "{entity} is ready."
+
+            ],
+
+            "OPEN_APP_FAILED": [
+
+                "I couldn't open {entity}.",
+
+                "I wasn't able to launch {entity}.",
+
+                "Opening {entity} failed."
+
+            ],
+
+            "SEARCH_SUCCESS": [
+
+                "Searching for {query}.",
+
+                "Looking up {query}.",
+
+                "Searching for {query}.",
+
+                "Got it. Searching for {query}."
+
+            ],
+
+            "SEARCH_FAILED": [
+
+                "I couldn't complete that search.",
+
+                "The search failed.",
+
+                "I couldn't finish that search."
+
+            ],
+
+            "PLAY_VIDEO_SUCCESS": [
+
+                "Playing video {position}.",
+
+                "Opening video {position}.",
+
+                "Video {position}, coming up.",
+
+                "Playing the requested video."
+
+            ],
+
+            "PLAY_VIDEO_FAILED": [
+
+                "I couldn't play that video.",
+
+                "I wasn't able to open the requested video.",
+
+                "The video didn't open successfully."
+
+            ],
+
+            "UNKNOWN": [
+
+                "I didn't understand that.",
+
+                "I'm not sure what you want me to do.",
+
+                "I couldn't determine the requested action.",
+
+                "I need a clearer command."
+
+            ],
+
+            "SUCCESS": [
+
+                "Done.",
+
+                "Completed.",
+
+                "That's done.",
+
+                "Handled."
+
+            ],
+
+            "FAILED": [
+
+                "That didn't work.",
+
+                "The task failed.",
+
+                "I couldn't complete that."
+
+            ]
+
+        }
+
+        choices = responses.get(
             key,
-            self.base["UNKNOWN"]
+            responses["UNKNOWN"]
         )
 
-        response = random.choice(choices)
-
-        response = response.format(
-            entity=entity or "that",
-            query=query or "that",
-            position=position or "requested"
+        response = random.choice(
+            choices
         )
 
-        return response
+        return response.format(
+
+            entity=(
+                entity
+                or "that"
+            ),
+
+            query=(
+                query
+                or "that"
+            ),
+
+            position=(
+                position
+                or "requested"
+            )
+
+        )
 
     # ==================================================
-    # PERSONALITY TRANSFORMATION
+    # DYNAMIC RESPONSE
     # ==================================================
 
-    def _apply_personality(self, response):
+    def _dynamic_response(
+        self,
+        intent,
+        entity=None,
+        query=None,
+        position=None,
+        command=None,
+        success=None
+    ):
+
+        profile = self.get_profile()
+
+        # ------------------------------------------
+        # Build dynamic context
+        # ------------------------------------------
 
         mode = self.mode
+
+        tone = profile[
+            "tone"
+        ]
+
+        intensity = profile[
+            "intensity"
+        ]
+
+        # Prevent unused-variable issues while
+        # keeping profile information available.
+        _ = tone
+        _ = intensity
+
+        # ------------------------------------------
+        # MIXED MODE
+        # ------------------------------------------
+
+        if mode == "MIXED":
+
+            possible_modes = [
+
+                "FAMILY",
+
+                "SARCASTIC",
+
+                "ROASTING",
+
+                "ABUSIVE"
+
+            ]
+
+            selected_mode = random.choice(
+                possible_modes
+            )
+
+            mode_for_model = (
+                selected_mode
+            )
+
+        else:
+
+            mode_for_model = mode
+
+        # ------------------------------------------
+        # Ask Ollama
+        # ------------------------------------------
+
+        try:
+
+            response = (
+                self.dynamic.generate(
+
+                    mode=mode_for_model,
+
+                    intent=intent,
+
+                    command=command,
+
+                    entity=entity,
+
+                    query=query,
+
+                    position=position,
+
+                    success=success,
+
+                    conversation_history=(
+                        self.get_conversation_context()
+                    ),
+
+                    personality_profile=profile
+
+                )
+            )
+
+            if response:
+
+                return response.strip()
+
+        except Exception as error:
+
+            print(
+                f"⚠ Personality LLM error: {error}"
+            )
+
+        # ------------------------------------------
+        # Fallback
+        # ------------------------------------------
+
+        return self._personality_fallback(
+
+            intent=intent,
+
+            entity=entity,
+
+            query=query,
+
+            position=position,
+
+            success=success,
+
+            mode=mode_for_model
+
+        )
+
+    # ==================================================
+    # FALLBACK PERSONALITY
+    # ==================================================
+
+    def _personality_fallback(
+        self,
+        intent,
+        entity=None,
+        query=None,
+        position=None,
+        success=None,
+        mode=None
+    ):
+
+        base = self._base_response(
+
+            intent=intent,
+
+            entity=entity,
+
+            query=query,
+
+            position=position,
+
+            success=success
+
+        )
+
+        mode = (
+            mode
+            or self.mode
+        )
 
         # ------------------------------------------
         # NORMAL
         # ------------------------------------------
 
         if mode == "NORMAL":
-            return response
+
+            return base
 
         # ------------------------------------------
         # FAMILY
@@ -247,7 +694,23 @@ class PersonalityEngine:
 
         if mode == "FAMILY":
 
-            return self._family(response)
+            return (
+
+                base
+
+                + random.choice([
+
+                    " Sure thing.",
+
+                    " Happy to help.",
+
+                    " All set.",
+
+                    " No problem."
+
+                ])
+
+            )
 
         # ------------------------------------------
         # SARCASTIC
@@ -255,7 +718,23 @@ class PersonalityEngine:
 
         if mode == "SARCASTIC":
 
-            return self._sarcastic(response)
+            return (
+
+                base
+
+                + random.choice([
+
+                    " Another extremely difficult task conquered.",
+
+                    " Look at us, accomplishing things.",
+
+                    " Because apparently I do everything around here.",
+
+                    " I suppose that was important."
+
+                ])
+
+            )
 
         # ------------------------------------------
         # ROASTING
@@ -263,7 +742,25 @@ class PersonalityEngine:
 
         if mode == "ROASTING":
 
-            return self._roasting(response)
+            return (
+
+                base
+
+                + random.choice([
+
+                    " Try not to create another disaster.",
+
+                    " Your laziness has been successfully supported.",
+
+                    " Congratulations, you survived another command.",
+
+                    " I handled it. You're welcome.",
+
+                    " Somehow, we made it through that one."
+
+                ])
+
+            )
 
         # ------------------------------------------
         # ABUSIVE
@@ -271,7 +768,47 @@ class PersonalityEngine:
 
         if mode == "ABUSIVE":
 
-            return self._abusive(response)
+            if success is False:
+
+                return (
+
+                    base
+
+                    + random.choice([
+
+                        " What the fuck was that?",
+
+                        " Great job, dumbass.",
+
+                        " You managed to screw that one up.",
+
+                        " For fuck's sake.",
+
+                        " What a fucking disaster."
+
+                    ])
+
+                )
+
+            return (
+
+                base
+
+                + random.choice([
+
+                    " There. Now stop fucking around.",
+
+                    " Done. Don't fuck it up.",
+
+                    " It's fucking handled.",
+
+                    " There you go, dumbass.",
+
+                    " Done. What the fuck do you want next?"
+
+                ])
+
+            )
 
         # ------------------------------------------
         # MIXED
@@ -279,100 +816,33 @@ class PersonalityEngine:
 
         if mode == "MIXED":
 
-            return self._mixed(response)
+            return self._personality_fallback(
 
-        return response
+                intent=intent,
 
-    # ==================================================
-    # FAMILY
-    # ==================================================
+                entity=entity,
 
-    def _family(self, response):
+                query=query,
 
-        additions = [
-            " Sure thing.",
-            " Happy to help.",
-            " All set.",
-            " No problem.",
-        ]
+                position=position,
 
-        return response + random.choice(
-            additions
-        )
+                success=success,
 
-    # ==================================================
-    # SARCASTIC
-    # ==================================================
+                mode=random.choice([
 
-    def _sarcastic(self, response):
+                    "FAMILY",
 
-        additions = [
-            " Because apparently I have to do everything around here.",
-            " As requested by the world's busiest person.",
-            " Another extremely difficult task conquered.",
-            " Look at us, accomplishing things.",
-            " I suppose that was important.",
-        ]
+                    "SARCASTIC",
 
-        return response + random.choice(
-            additions
-        )
+                    "ROASTING",
 
-    # ==================================================
-    # ROASTING
-    # ==================================================
+                    "ABUSIVE"
 
-    def _roasting(self, response):
+                ])
 
-        additions = [
-            " Try not to create another disaster.",
-            " Your laziness has been successfully supported.",
-            " Congratulations, you survived another command.",
-            " I handled it. You're welcome.",
-            " Somehow, we made it through that one.",
-        ]
+            )
 
-        return response + random.choice(
-            additions
-        )
-
-    # ==================================================
-    # ABUSIVE
-    # ==================================================
-
-    def _abusive(self, response):
-
-        additions = [
-            " Now stop making my life difficult.",
-            " There. Happy now?",
-            " Finally, something you managed to ask correctly.",
-            " Done. Try not to screw it up.",
-            " You're welcome, genius.",
-        ]
-
-        return response + random.choice(
-            additions
-        )
-
-    # ==================================================
-    # MIXED
-    # ==================================================
-
-    def _mixed(self, response):
-
-        # Dynamically select a personality style
-        # for each response.
-
-        styles = [
-            self._family,
-            self._sarcastic,
-            self._roasting,
-            self._abusive,
-        ]
-
-        style = random.choice(styles)
-
-        return style(response)
+        return base
 
     # ==================================================
     # MAIN RESPONSE
@@ -384,19 +854,74 @@ class PersonalityEngine:
         entity=None,
         query=None,
         position=None,
+        success=None,
+        command=None
+    ):
+
+        # ------------------------------------------
+        # Generate dynamic response
+        # ------------------------------------------
+
+        response = (
+
+            self._dynamic_response(
+
+                intent=intent,
+
+                entity=entity,
+
+                query=query,
+
+                position=position,
+
+                command=command,
+
+                success=success
+
+            )
+
+        )
+
+        if command and response:
+
+            self.remember_conversation(
+                command,
+                response
+            )
+
+        return response
+
+    # ==================================================
+    # STORE COMPLETE EXCHANGE
+    # ==================================================
+
+    def remember_exchange(
+        self,
+        user_message,
+        assistant_response,
+        decision=None,
         success=None
     ):
 
-        response = self._base_response(
-            intent=intent,
-            entity=entity,
-            query=query,
-            position=position,
-            success=success
-        )
+        # ------------------------------------------
+        # Store task memory when a decision exists
+        # ------------------------------------------
 
-        response = self._apply_personality(
-            response
-        )
+        if decision is not None:
 
-        return response
+            self.remember(
+                decision,
+                success
+            )
+
+        # ------------------------------------------
+        # Store conversation memory
+        # ------------------------------------------
+
+        self.remember_conversation(
+
+            user_message,
+
+            assistant_response
+
+        )
